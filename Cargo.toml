@@ -1,0 +1,17 @@
+[package]
+name = "allies-calc-rs"
+version = "0.1.0"
+authors = ["Michael Johnson <michael@ociaw.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+calc = { path = "calc", version = "0.1.0" }
+aa1942_2e = { path = "aa1942_2e", version = "0.1.0" }
+
+[workspace]
+members = [
+    "calc",
+    "aa1942_2e"
+]

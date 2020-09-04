@@ -1,0 +1,7 @@
+[package]
+name = "aa1942_2e"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+calc = { path = "../calc", version = "0.1.0" }

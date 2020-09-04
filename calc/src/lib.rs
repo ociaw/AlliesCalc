@@ -1,0 +1,30 @@
+mod combat;
+mod combat_manager;
+mod hit;
+mod prob;
+mod pruner;
+mod quant;
+mod roll;
+mod roller;
+mod round_manager;
+mod round_result;
+mod statistics;
+mod survivor_selector;
+mod unit;
+
+pub use combat::{Combat, CombatContext, CombatResult, CombatSequence, CombatType, Side};
+pub use combat_manager::CombatManager;
+pub use hit::Hit;
+pub use prob::{Prob, ProbDist};
+pub use pruner::Pruner;
+pub use quant::{Quant, QuantDist};
+pub use roll::{Roll, RollSelector};
+pub use round_manager::RoundManager;
+pub use round_result::RoundResult;
+pub use statistics::Statistics;
+pub use survivor_selector::SurvivorSelector;
+pub use unit::{Force, Unit};
+
+pub use roller::roll_hits;
+
+pub type Probability = f64;
