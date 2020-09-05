@@ -1,9 +1,9 @@
 use crate::{Force, Hit, ProbDist, QuantDist, Unit};
 
-pub trait SurvivorSelector<THit, TUnit>
+pub trait SurvivorSelector<TUnit, THit>
 where
-    THit: Hit,
     TUnit: Unit,
+    THit: Hit<TUnit>,
 {
     fn select(
         &self,

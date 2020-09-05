@@ -6,10 +6,10 @@ use calc::*;
 
 fn main() {
     let attackers = Force::new(QuantDist {
-        outcomes: vec![Quant::new(Unit1942_2E::Submarine, 1)],
+        outcomes: vec![Quant::new(Unit1942_2E::BombardingBattleship, 1)],
     });
     let defenders = Force::new(QuantDist {
-        outcomes: vec![Quant::new(Unit1942_2E::Cruiser, 1)],
+        outcomes: vec![Quant::new(Unit1942_2E::Infantry, 1)],
     });
 
     let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
@@ -64,7 +64,7 @@ fn main() {
     if round_manager.last_round().stalemate {
         println!(
             "Stalemate: {:>5.2}%",
-            round_manager.last_round().total_probability()
+            round_manager.last_round().total_probability() * 100.0
         );
     }
 

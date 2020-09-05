@@ -1,3 +1,5 @@
+use crate::*;
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Hit {
     AllUnits,
@@ -6,7 +8,16 @@ pub enum Hit {
     OnlyAirUnits,
 }
 
-impl calc::Hit for Hit {}
+impl calc::Hit<crate::Unit> for Hit {
+    fn hits(self, unit: Unit) -> bool {
+        match self {
+            Hit::AllUnits => true,
+            Hit::NotSubmarines => !unit.is_submarine(),
+            Hit::NotAirUnits => !unit.is_air(),
+            Hit::OnlyAirUnits => unit.is_air(),
+        }
+    }
+}
 
 impl Hit {
     pub fn order() -> [Hit; 4] {

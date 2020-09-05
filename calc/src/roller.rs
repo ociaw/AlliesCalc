@@ -1,9 +1,9 @@
-use crate::{Hit, Prob, ProbDist, Probability, Quant, QuantDist, Roll};
+use crate::*;
 use statrs::distribution::{Binomial, Discrete};
 use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
-pub fn roll_hits<THit: Hit>(strike: &QuantDist<Roll<THit>>) -> ProbDist<QuantDist<THit>> {
+pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, THit>>) -> ProbDist<QuantDist<THit>> {
     let mut hit_dists = HashMap::with_capacity(strike.outcomes.len());
     for quant in &strike.outcomes {
         let roll = quant.item;
@@ -49,7 +49,7 @@ fn combine_dists(destination: &ProbDist<u32>, source: &ProbDist<u32>) -> ProbDis
     result
 }
 
-fn combine_hit_dists<THit: Hit>(
+fn combine_hit_dists<TUnit: Unit, THit: Hit<TUnit>>(
     hit_dists: &mut Iter<THit, ProbDist<u32>>,
     hit_stack: &mut Vec<Quant<THit>>,
     current_p: Probability,

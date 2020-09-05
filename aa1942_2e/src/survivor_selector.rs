@@ -72,7 +72,8 @@ impl SurvivorSelector {
         let mut total_removed = 0;
 
         for unit in &self.removal_order {
-            if !unit.can_be_hit(hit) {
+            use calc::Hit;
+            if !hit.hits(*unit) {
                 continue;
             }
 
@@ -101,7 +102,7 @@ impl SurvivorSelector {
     }
 }
 
-impl calc::SurvivorSelector<Hit, Unit> for SurvivorSelector {
+impl calc::SurvivorSelector<Unit, Hit> for SurvivorSelector {
     fn select(
         &self,
         starting_force: &QuantDist<Unit>,

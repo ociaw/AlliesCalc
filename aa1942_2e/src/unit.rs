@@ -1,5 +1,3 @@
-use crate::*;
-
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Unit {
     Infantry,
@@ -33,15 +31,14 @@ impl Unit {
         }
     }
 
-    pub fn can_be_hit(self, hit: Hit) -> bool {
-        match hit {
-            Hit::AllUnits => true,
-            Hit::NotSubmarines => match self {
-                Unit::Submarine => false,
-                _ => true,
-            },
-            Hit::NotAirUnits => !self.is_air(),
-            Hit::OnlyAirUnits => self.is_air(),
+    pub fn is_submarine(self) -> bool {
+        self == Unit::Submarine
+    }
+
+    pub fn is_targetable(self) -> bool {
+        match self {
+            Unit::BombardingCruiser | Unit::BombardingBattleship => false,
+            _ => true,
         }
     }
 

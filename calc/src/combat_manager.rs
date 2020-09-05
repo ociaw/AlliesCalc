@@ -3,10 +3,10 @@ use std::marker::PhantomData;
 
 pub struct CombatManager<
     TCombatType: CombatType,
-    THit: Hit,
     TUnit: Unit,
-    TRollSelector: RollSelector<TCombatType, THit, TUnit>,
-    TSurvivorSelector: SurvivorSelector<THit, TUnit>,
+    THit: Hit<TUnit>,
+    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 > {
     attacker_survivor_selector: TSurvivorSelector,
     defender_survivor_selector: TSurvivorSelector,
@@ -17,13 +17,13 @@ pub struct CombatManager<
 }
 
 impl<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
-    CombatManager<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
+    CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>
 where
     TCombatType: CombatType,
-    THit: Hit,
     TUnit: Unit,
-    TRollSelector: RollSelector<TCombatType, THit, TUnit>,
-    TSurvivorSelector: SurvivorSelector<THit, TUnit>,
+    THit: Hit<TUnit>,
+    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
     pub fn new(
         attacker_survivor_selector: TSurvivorSelector,

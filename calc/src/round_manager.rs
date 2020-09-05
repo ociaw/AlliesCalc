@@ -2,12 +2,12 @@ use crate::*;
 
 pub struct RoundManager<
     TCombatType: CombatType,
-    THit: Hit,
     TUnit: Unit,
-    TRollSelector: RollSelector<TCombatType, THit, TUnit>,
-    TSurvivorSelector: SurvivorSelector<THit, TUnit>,
+    THit: Hit<TUnit>,
+    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 > {
-    combat_manager: CombatManager<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>,
+    combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
     sequence: CombatSequence<TCombatType>,
     round_index: usize,
     last_round: RoundResult<TCombatType, TUnit>,
@@ -16,16 +16,16 @@ pub struct RoundManager<
 }
 
 impl<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
-    RoundManager<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
+    RoundManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>
 where
     TCombatType: CombatType,
-    THit: Hit,
     TUnit: Unit,
-    TRollSelector: RollSelector<TCombatType, THit, TUnit>,
-    TSurvivorSelector: SurvivorSelector<THit, TUnit>,
+    THit: Hit<TUnit>,
+    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
     pub fn new(
-        combat_manager: CombatManager<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>,
+        combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
         sequence: CombatSequence<TCombatType>,
         attackers: Force<TUnit>,
         defenders: Force<TUnit>,

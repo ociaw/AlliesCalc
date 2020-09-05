@@ -46,16 +46,12 @@ impl Context {
     }
 }
 
-impl calc::RollSelector<CombatType, Hit, Unit> for RollSelector
-where
-    CombatType: calc::CombatType,
-    Hit: calc::Hit,
-    Unit: calc::Unit,
+impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
 {
     fn get_rolls(
         &self,
         context: &calc::CombatContext<CombatType, Unit>,
-    ) -> calc::QuantDist<Roll<Hit>> {
+    ) -> calc::QuantDist<Roll<Unit, Hit>> {
         let force = context.friendlies();
         let context = Context::convert(context);
         let combat = context.combat;
