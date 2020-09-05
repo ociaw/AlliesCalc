@@ -55,7 +55,7 @@ mod tests {
         assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 3.0, ulps = 1));
         assert!(approx_eq!(f64, stats.draw_p(), 2.0 / 3.0, ulps = 1));
 
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, epsilon = 0.00000000002));
+        assert_eq!(stats.total_p(), 1.0);
     }
 
     #[test]
@@ -70,15 +70,15 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
 
-        assert!(approx_eq!(f64, stats.attacker_ipc_lost(), 3.0, epsilon = 0.00000000004));
-        assert!(approx_eq!(f64, stats.defender_ipc_lost(), 6.0, epsilon = 0.00000000007));
+        assert!(approx_eq!(f64, stats.attacker_ipc_lost(), 3.0, ulps = 6));
+        assert!(approx_eq!(f64, stats.defender_ipc_lost(), 6.0, ulps = 6));
 
         assert!(approx_eq!(f64, stats.attacker_win_p(), stats.defender_win_p(), ulps = 2));
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 0.5, epsilon = 0.000000000006));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 0.5, epsilon = 0.000000000006));
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 0.5, ulps = 3));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 0.5, ulps = 3));
         assert_eq!(stats.draw_p(), 0.0);
 
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, epsilon = 0.00000000002));
+        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 6));
     }
 
     #[test]
@@ -94,6 +94,7 @@ mod tests {
         run_to_completion(&mut round_manager, &mut stats);
 
         assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
+        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
     }
 
     #[test]
@@ -109,6 +110,7 @@ mod tests {
         run_to_completion(&mut round_manager, &mut stats);
 
         assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
+        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
     }
 
     fn setup(attackers: Force<Unit>, defenders: Force<Unit>) -> (Statistics, RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>) {
@@ -116,8 +118,9 @@ mod tests {
         let combat_manager = get_combat_manager();
 
         let stats = Statistics::new(&attackers, &defenders);
-        let round_manager =
+        let mut round_manager =
             RoundManager::new(combat_manager, sequence.clone(), attackers, defenders);
+        round_manager.set_prune_threshold(0.0);
         (stats, round_manager)
     }
 

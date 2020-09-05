@@ -9,6 +9,7 @@ pub struct RoundManager<
 > {
     combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
     sequence: CombatSequence<TCombatType>,
+    pruner: Pruner,
     round_index: usize,
     last_round: RoundResult<TCombatType, TUnit>,
     last_probability: f64,
@@ -35,6 +36,7 @@ where
         RoundManager {
             combat_manager,
             sequence,
+            pruner: Default::default(),
             round_index,
             last_round: RoundResult {
                 pending: ProbDist {
@@ -72,11 +74,10 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
         let next_combat_type = self.sequence.combat_at(self.round_index + 1);
-        let mut pruner = Pruner::new(0.00000000001);
         let mut result = RoundResult::default();
         for combat in &self.last_round.pending.outcomes {
             let combat_result = self.combat_manager.resolve(combat, next_combat_type);
-            result.add(combat_result, &mut pruner);
+            result.add(combat_result, &mut self.pruner);
         }
 
         // We check if the current probability and the last probability are *exactly* the same;
@@ -107,5 +108,9 @@ where
 
     pub fn is_complete(&self) -> bool {
         self.last_round.is_complete()
+    }
+
+    pub fn set_prune_threshold(&mut self, p: Probability) {
+        self.pruner.threshold = p;
     }
 }
