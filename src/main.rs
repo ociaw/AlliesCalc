@@ -1,6 +1,4 @@
 use aa1942_2e::CombatType as CombatType1942_2E;
-use aa1942_2e::RollSelector as RollSelector1942_2E;
-use aa1942_2e::SurvivorSelector as SurvivorSelector1942_2E;
 use aa1942_2e::Unit as Unit1942_2E;
 use calc::*;
 
@@ -13,21 +11,7 @@ fn main() {
     });
 
     let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
-    let attacker_survivor_selector = aa1942_2e::SurvivorSelector {
-        removal_order: SurvivorSelector1942_2E::default_attacker_order(),
-        reserved: Some(Unit1942_2E::Tank),
-    };
-    let defender_survivor_selector = aa1942_2e::SurvivorSelector {
-        removal_order: SurvivorSelector1942_2E::default_defender_order(),
-        reserved: None,
-    };
-
-    let roll_selector = RollSelector1942_2E {};
-    let combat_manager = CombatManager::new(
-        attacker_survivor_selector,
-        defender_survivor_selector,
-        roll_selector,
-    );
+    let combat_manager = aa1942_2e::get_combat_manager();
 
     let mut stats = Statistics::new(&attackers, &defenders);
     let mut round_manager =
@@ -40,8 +24,7 @@ fn main() {
             round_index,
             sequence.combat_at(round_index)
         );
-        round_manager.advance_round();
-        let last_round = round_manager.last_round();
+        let last_round = round_manager.advance_round();
         stats.add_dist(&last_round.completed);
 
         println!(

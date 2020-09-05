@@ -69,7 +69,7 @@ where
     }
 
     #[allow(clippy::float_cmp)]
-    pub fn advance_round(&mut self) {
+    pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
         let next_combat_type = self.sequence.combat_at(self.round_index + 1);
         let mut pruner = Pruner::new(0.00000000001);
@@ -94,6 +94,7 @@ where
         }
 
         self.last_round = result;
+        &self.last_round
     }
 
     pub fn round_index(&self) -> usize {

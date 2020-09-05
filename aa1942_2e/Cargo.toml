@@ -5,3 +5,6 @@ edition = "2018"
 
 [dependencies]
 calc = { path = "../calc", version = "0.1.0" }
+
+[dev-dependencies]
+float-cmp = "0.8.0"
