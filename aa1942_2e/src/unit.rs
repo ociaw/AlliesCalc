@@ -48,6 +48,25 @@ impl Unit {
             _ => None,
         }
     }
+
+    pub fn all() -> [Unit; 14] {
+        [
+            Unit::Infantry,
+            Unit::Artillery,
+            Unit::Tank,
+            Unit::AntiAir,
+            Unit::BombardingCruiser,
+            Unit::BombardingBattleship,
+            Unit::Fighter,
+            Unit::Bomber,
+            Unit::Submarine,
+            Unit::Destroyer,
+            Unit::Cruiser,
+            Unit::Carrier,
+            Unit::Battleship,
+            Unit::BattleshipDamaged,
+        ]
+    }
 }
 
 impl calc::Unit for Unit {

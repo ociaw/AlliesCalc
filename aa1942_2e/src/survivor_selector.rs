@@ -100,6 +100,17 @@ impl SurvivorSelector {
 
         total_removed
     }
+
+    fn without_nontargetable(force: &QuantDist<Unit>) -> QuantDist<Unit> {
+        let mut force = force.clone();
+        for unit in &Unit::all() {
+            if unit.is_targetable() {
+                continue;
+            }
+            force.remove_all(&unit);
+        }
+        force
+    }
 }
 
 impl calc::SurvivorSelector<Unit, Hit> for SurvivorSelector {
@@ -109,6 +120,7 @@ impl calc::SurvivorSelector<Unit, Hit> for SurvivorSelector {
         hit_dists: &ProbDist<QuantDist<Hit>>,
     ) -> ProbDist<Force<Unit>> {
         let mut result = ProbDist::<Force<Unit>>::new();
+        let starting_force = &Self::without_nontargetable(starting_force);
         for hit_dist in &hit_dists.outcomes {
             let survivors = self.select_survivors(starting_force, &hit_dist.item);
             result.add(Prob {

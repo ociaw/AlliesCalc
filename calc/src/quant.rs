@@ -71,6 +71,18 @@ impl<T: Eq> QuantDist<T> {
         }
     }
 
+    pub fn remove_all(&mut self, item: &T) -> u32 {
+        let index = self.find_index(item);
+        match index {
+            None => 0,
+            Some(index) => {
+                let removable = self.outcomes[index].count;
+                self.outcomes.remove(index);
+                removable
+            }
+        }
+    }
+
     pub fn count(&self, item: &T) -> u32 {
         match self.find_index(item) {
             Some(index) => self.outcomes[index].count,
