@@ -12,7 +12,7 @@ pub struct RoundManager<
     pruner: Pruner,
     round_index: usize,
     last_round: RoundResult<TCombatType, TUnit>,
-    last_probability: f64,
+    last_probability: Probability,
     probability_run_count: usize,
 }
 
@@ -46,7 +46,7 @@ where
                             defenders: defenders.clone(),
                             combat_type,
                         },
-                        p: 1.0,
+                        p: Probability::one(),
                     }],
                 },
                 completed: ProbDist::new(),
@@ -54,18 +54,18 @@ where
                 surviving_attackers: ProbDist {
                     outcomes: vec![Prob {
                         item: attackers,
-                        p: 1.0,
+                        p: Probability::one(),
                     }],
                 },
                 surviving_defenders: ProbDist {
                     outcomes: vec![Prob {
                         item: defenders,
-                        p: 1.0,
+                        p: Probability::one(),
                     }],
                 },
                 stalemate: false,
             },
-            last_probability: 0.0,
+            last_probability: Probability::zero(),
             probability_run_count: 0,
         }
     }

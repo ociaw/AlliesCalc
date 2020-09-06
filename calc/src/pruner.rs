@@ -12,7 +12,7 @@ impl Pruner {
         Pruner {
             threshold,
             count: 0,
-            sum: 0.0,
+            sum: Default::default(),
         }
     }
 
@@ -33,10 +33,11 @@ impl Pruner {
 
 impl Default for Pruner {
     fn default() -> Self {
+        use std::convert::TryInto;
         Self {
-            threshold: 0.000000001,
+            threshold: 0.000000001.try_into().unwrap(),
             count: 0,
-            sum: 0.0,
+            sum: Default::default(),
         }
     }
 }

@@ -4,6 +4,8 @@ use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
 pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, THit>>) -> ProbDist<QuantDist<THit>> {
+    use std::convert::TryInto;
+
     let mut hit_dists = HashMap::with_capacity(strike.outcomes.len());
     for quant in &strike.outcomes {
         let roll = quant.item;
@@ -17,7 +19,7 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, T
             let mass = binomial.pmf(hit_count as u64);
             dist.add(Prob {
                 item: hit_count,
-                p: mass,
+                p: mass.try_into().unwrap(),
             });
         }
 
@@ -33,7 +35,7 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, T
     }
 
     let mut results = ProbDist::new();
-    combine_hit_dists(&mut hit_dists.iter(), &mut Vec::new(), 1.0, &mut results);
+    combine_hit_dists(&mut hit_dists.iter(), &mut Vec::new(), Probability::one(), &mut results);
     results
 }
 

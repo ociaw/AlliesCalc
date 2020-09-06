@@ -26,10 +26,10 @@ impl Statistics {
             attacker_count: 0,
             defender_count: 0,
             draw_count: 0,
-            attacker_p: 0.0,
-            defender_p: 0.0,
-            draw_p: 0.0,
-            total_p: 0.0,
+            attacker_p: Default::default(),
+            defender_p: Default::default(),
+            draw_p: Default::default(),
+            total_p: Default::default(),
             attacker_ipc_mean: 0.0,
             defender_ipc_mean: 0.0,
             attacker_ipc_s: 0.0,
@@ -58,19 +58,19 @@ impl Statistics {
     }
 
     pub fn attacker_ipc_lost(&self) -> f64 {
-        (self.attacker_ipc_initial - self.attacker_ipc_mean) * self.total_p
+        (self.attacker_ipc_initial - self.attacker_ipc_mean) * f64::from(self.total_p)
     }
 
     pub fn defender_ipc_lost(&self) -> f64 {
-        (self.defender_ipc_initial - self.defender_ipc_mean) * self.total_p
+        (self.defender_ipc_initial - self.defender_ipc_mean) * f64::from(self.total_p)
     }
 
     pub fn attacker_ipc_variance(&self) -> f64 {
-        self.attacker_ipc_s / self.total_p
+        self.attacker_ipc_s / f64::from(self.total_p)
     }
 
     pub fn defender_ipc_variance(&self) -> f64 {
-        self.defender_ipc_s / self.total_p
+        self.defender_ipc_s / f64::from(self.total_p)
     }
 
     pub fn add_dist<TCombatType: CombatType, TUnit: Unit>(
@@ -126,9 +126,10 @@ impl Statistics {
     }
 }
 
-fn update_means(value: f64, p: f64, total_p: f64, mean: &mut f64, s: &mut f64) {
+fn update_means(value: f64, p: Probability, total_p: Probability, mean: &mut f64, s: &mut f64) {
     let old_mean = *mean;
-    *mean += (p / total_p) * (value - *mean);
+    let p = f64::from(p);
+    *mean += (p / f64::from(total_p)) * (value - *mean);
     *s += p * (value - old_mean) * (value - *mean);
 }
 

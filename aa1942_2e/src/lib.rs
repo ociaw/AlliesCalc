@@ -51,11 +51,11 @@ mod tests {
         assert_eq!(stats.defender_ipc_lost(), 2.0);
         assert_eq!(stats.total_count(), 2);
 
-        assert_eq!(stats.attacker_win_p(), 0.0);
-        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 3.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.draw_p(), 2.0 / 3.0, ulps = 1));
+        assert_eq!(stats.attacker_win_p(), Probability::zero());
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 1.0 / 3.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.draw_p().into(), 2.0 / 3.0, ulps = 1));
 
-        assert_eq!(stats.total_p(), 1.0);
+        assert_eq!(stats.total_p(), Probability::one());
     }
 
     #[test]
@@ -73,12 +73,12 @@ mod tests {
         assert!(approx_eq!(f64, stats.attacker_ipc_lost(), 3.0, ulps = 6));
         assert!(approx_eq!(f64, stats.defender_ipc_lost(), 6.0, ulps = 6));
 
-        assert!(approx_eq!(f64, stats.attacker_win_p(), stats.defender_win_p(), ulps = 2));
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 0.5, ulps = 3));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 0.5, ulps = 3));
-        assert_eq!(stats.draw_p(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), stats.defender_win_p().into(), ulps = 2));
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 0.5, ulps = 3));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 0.5, ulps = 3));
+        assert_eq!(stats.draw_p(), Probability::zero());
 
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 6));
+        assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 6));
     }
 
     #[test]
@@ -94,7 +94,7 @@ mod tests {
         run_to_completion(&mut round_manager, &mut stats);
 
         assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 1));
     }
 
     #[test]
@@ -110,7 +110,7 @@ mod tests {
         run_to_completion(&mut round_manager, &mut stats);
 
         assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 1));
 
         let attackers = Force::new(QuantDist {
             outcomes: vec![Quant::new(Unit::Infantry, 2), Quant::new(Unit::Artillery, 1)],
@@ -122,8 +122,8 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
 
-        assert!(stats.attacker_win_p() < stats.defender_win_p());
-        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
+        assert!(f64::from(stats.attacker_win_p()) < f64::from(stats.defender_win_p()));
+        assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 1));
     }
 
     #[test]
@@ -138,10 +138,10 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
 
-        assert_eq!(stats.attacker_win_p(), 0.0);
-        assert_eq!(stats.defender_win_p(), 0.0);
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(round_manager.last_round().total_probability(), 1.0);
+        assert_eq!(stats.attacker_win_p(), Probability::zero());
+        assert_eq!(stats.defender_win_p(), Probability::zero());
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(round_manager.last_round().total_probability(), Probability::one());
         assert!(round_manager.last_round().stalemate);
     }
 
@@ -158,10 +158,10 @@ mod tests {
         let last_round = run_to_completion(&mut round_manager, &mut stats);
 
         // See test_probabilities.txt for probabilty calculations
-        assert_eq!(stats.attacker_win_p(), 0.0);
-        assert!(approx_eq!(f64, stats.defender_win_p(), 834.0 / 1679.0, ulps = 2));
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(last_round.total_probability(), 845.0 / 1679.0);
+        assert_eq!(stats.attacker_win_p(), Probability::zero());
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 834.0 / 1679.0, ulps = 2));
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(last_round.total_probability(), Probability::from_ratio(845, 1679));
         assert!(round_manager.last_round().stalemate);
     }
 
@@ -177,10 +177,10 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
 
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 5.0 / 6.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 6.0, ulps = 1));
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 5.0 / 6.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 1.0 / 6.0, ulps = 1));
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
         let attackers = Force::new(QuantDist {
@@ -189,10 +189,10 @@ mod tests {
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 35.0 / 36.0, ulps = 8));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 36.0, ulps = 1));
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 35.0 / 36.0, ulps = 8));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 1.0 / 36.0, ulps = 1));
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
         let attackers = Force::new(QuantDist {
@@ -201,10 +201,10 @@ mod tests {
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 215.0 / 216.0, ulps = 7));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 216.0, ulps = 1));
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 215.0 / 216.0, ulps = 7));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 1.0 / 216.0, ulps = 1));
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
         let attackers = Force::new(QuantDist {
@@ -213,10 +213,10 @@ mod tests {
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 1.0, ulps = 1));
-        assert_eq!(stats.defender_win_p(), 0.0);
-        assert_eq!(stats.draw_p(), 0.0);
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 1.0, ulps = 1));
+        assert_eq!(stats.defender_win_p(), Probability::zero());
+        assert_eq!(stats.draw_p(), Probability::zero());
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
     }
 
@@ -233,10 +233,10 @@ mod tests {
         let last_round = run_to_completion(&mut round_manager, &mut stats);
 
         // See test_probabilities.txt for probabilty calculations
-        assert_eq!(stats.attacker_win_p(), 1.0 / 16.0);
-        assert!(approx_eq!(f64, stats.defender_win_p(), 13.0 / 16.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.draw_p(), 2.0 / 16.0, ulps = 1));
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert_eq!(stats.attacker_win_p(), Probability::from_ratio(1, 16));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 13.0 / 16.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.draw_p().into(), 2.0 / 16.0, ulps = 1));
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
     }
 
@@ -252,10 +252,10 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         let last_round = run_to_completion(&mut round_manager, &mut stats);
 
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 1.0 / 4.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 4.0, ulps = 1));
-        assert_eq!(stats.draw_p(), 2.0 / 4.0);
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 1.0 / 4.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 1.0 / 4.0, ulps = 1));
+        assert_eq!(stats.draw_p(), Probability::from_ratio(2, 4));
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
     }
 
@@ -273,11 +273,11 @@ mod tests {
         let last_round = run_to_completion(&mut round_manager, &mut stats);
 
         // See test_probabilities.txt for probabilty calculations
-        assert!(approx_eq!(f64, stats.attacker_win_p(), 2351.0 / 6545.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.defender_win_p(), 2726.0 / 6545.0, ulps = 1));
-        assert!(approx_eq!(f64, stats.draw_p(), 1468.0 / 6545.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), 2351.0 / 6545.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p().into(), 2726.0 / 6545.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.draw_p().into(), 1468.0 / 6545.0, ulps = 1));
 
-        assert_eq!(last_round.total_probability(), 0.0);
+        assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
     }
 
@@ -288,7 +288,7 @@ mod tests {
         let stats = Statistics::new(&attackers, &defenders);
         let mut round_manager =
             RoundManager::new(combat_manager, sequence.clone(), attackers, defenders);
-        round_manager.set_prune_threshold(0.0);
+        round_manager.set_prune_threshold(Probability::zero());
         (stats, round_manager)
     }
 

@@ -2,6 +2,7 @@ mod combat;
 mod combat_manager;
 mod hit;
 mod prob;
+mod probability;
 mod pruner;
 mod quant;
 mod roll;
@@ -16,6 +17,7 @@ pub use combat::{Combat, CombatContext, CombatResult, CombatSequence, CombatType
 pub use combat_manager::CombatManager;
 pub use hit::Hit;
 pub use prob::{Prob, ProbDist};
+pub use probability::Probability;
 pub use pruner::Pruner;
 pub use quant::{Quant, QuantDist};
 pub use roll::{Roll, RollSelector};
@@ -26,5 +28,3 @@ pub use survivor_selector::SurvivorSelector;
 pub use unit::{Force, Unit};
 
 pub use roller::roll_hits;
-
-pub type Probability = f64;
