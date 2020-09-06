@@ -64,7 +64,7 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
                         if context.defending {
                             rolls.add(Roll::new(2, Hit::NotSubmarines), count);
                         } else {
-                            let weak_count = std::cmp::max(count - context.friendly_artillery, 0);
+                            let weak_count = if count < context.friendly_artillery { 0 } else { count - context.friendly_artillery };
                             let strong_count = std::cmp::min(count, context.friendly_artillery);
                             rolls.add(Roll::new(1, Hit::NotSubmarines), weak_count);
                             rolls.add(Roll::new(2, Hit::NotSubmarines), strong_count);

@@ -111,6 +111,19 @@ mod tests {
 
         assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
         assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
+
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Infantry, 2), Quant::new(Unit::Artillery, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Infantry, 2), Quant::new(Unit::Artillery, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        run_to_completion(&mut round_manager, &mut stats);
+
+        assert!(stats.attacker_win_p() < stats.defender_win_p());
+        assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
     }
 
     #[test]
@@ -242,6 +255,28 @@ mod tests {
         assert!(approx_eq!(f64, stats.attacker_win_p(), 1.0 / 4.0, ulps = 1));
         assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 4.0, ulps = 1));
         assert_eq!(stats.draw_p(), 2.0 / 4.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+    }
+
+    #[test]
+    fn reserve_tank() {
+        // One tank is reserved by default
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Bomber, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Fighter, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+
+        // See test_probabilities.txt for probabilty calculations
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 2351.0 / 6545.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 2726.0 / 6545.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.draw_p(), 1468.0 / 6545.0, ulps = 1));
+
         assert_eq!(last_round.total_probability(), 0.0);
         assert!(!round_manager.last_round().stalemate);
     }

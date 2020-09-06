@@ -80,7 +80,8 @@ impl SurvivorSelector {
             // If the current unit is reserved, keep at least one of it
             let remove_count = match reserved {
                 Some(reserved) if reserved == *unit => {
-                    std::cmp::min(count, std::cmp::max(candidates.count(&unit), 0))
+                    let candidate_count = candidates.count(&unit);
+                    std::cmp::min(count, if candidate_count > 1 { candidate_count - 1 } else { 0 })
                 }
                 _ => count,
             };
