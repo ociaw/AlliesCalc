@@ -113,6 +113,139 @@ mod tests {
         assert!(approx_eq!(f64, stats.total_p(), 1.0, ulps = 1));
     }
 
+    #[test]
+    fn sub_plane_stalemate() {
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Submarine, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        run_to_completion(&mut round_manager, &mut stats);
+
+        assert_eq!(stats.attacker_win_p(), 0.0);
+        assert_eq!(stats.defender_win_p(), 0.0);
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(round_manager.last_round().total_probability(), 1.0);
+        assert!(round_manager.last_round().stalemate);
+    }
+
+    #[test]
+    fn sub_plane_destroyer() {
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Submarine, 2)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 1), Quant::new(Unit::Destroyer, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+
+        // See test_probabilities.txt for probabilty calculations
+        assert_eq!(stats.attacker_win_p(), 0.0);
+        assert!(approx_eq!(f64, stats.defender_win_p(), 834.0 / 1679.0, ulps = 2));
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(last_round.total_probability(), 845.0 / 1679.0);
+        assert!(round_manager.last_round().stalemate);
+    }
+
+    #[test]
+    fn antiair() {
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::AntiAir, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 5.0 / 6.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 6.0, ulps = 1));
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 2)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 35.0 / 36.0, ulps = 8));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 36.0, ulps = 1));
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 215.0 / 216.0, ulps = 7));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 216.0, ulps = 1));
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 2)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 1.0, ulps = 1));
+        assert_eq!(stats.defender_win_p(), 0.0);
+        assert_eq!(stats.draw_p(), 0.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+    }
+
+    #[test]
+    fn battleship_undamaged() {
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Bomber, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Battleship, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+
+        // See test_probabilities.txt for probabilty calculations
+        assert_eq!(stats.attacker_win_p(), 1.0 / 16.0);
+        assert!(approx_eq!(f64, stats.defender_win_p(), 13.0 / 16.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.draw_p(), 2.0 / 16.0, ulps = 1));
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+    }
+
+    #[test]
+    fn battleship_damaged() {
+        let attackers = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::Bomber, 1)],
+        });
+        let defenders = Force::new(QuantDist {
+            outcomes: vec![Quant::new(Unit::BattleshipDamaged, 1)],
+        });
+
+        let (mut stats, mut round_manager) = setup(attackers, defenders);
+        let last_round = run_to_completion(&mut round_manager, &mut stats);
+
+        assert!(approx_eq!(f64, stats.attacker_win_p(), 1.0 / 4.0, ulps = 1));
+        assert!(approx_eq!(f64, stats.defender_win_p(), 1.0 / 4.0, ulps = 1));
+        assert_eq!(stats.draw_p(), 2.0 / 4.0);
+        assert_eq!(last_round.total_probability(), 0.0);
+        assert!(!round_manager.last_round().stalemate);
+    }
+
     fn setup(attackers: Force<Unit>, defenders: Force<Unit>) -> (Statistics, RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>) {
         let sequence = CombatType::create_sequence(&attackers, &defenders);
         let combat_manager = get_combat_manager();
@@ -124,9 +257,10 @@ mod tests {
         (stats, round_manager)
     }
 
-    fn run_to_completion(round_manager: &mut RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>, stats: &mut Statistics) {
+    fn run_to_completion<'a>(round_manager: &'a mut RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>, stats: &mut Statistics) -> &'a RoundResult<CombatType, Unit> {
         while !round_manager.is_complete() {
             stats.add_dist(&round_manager.advance_round().completed);
         }
+        &round_manager.advance_round()
     }
 }
