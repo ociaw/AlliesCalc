@@ -4,10 +4,25 @@ use calc::*;
 
 fn main() {
     let attackers = Force::new(QuantDist {
-        outcomes: vec![Quant::new(Unit1942_2E::BombardingBattleship, 1)],
+        outcomes: vec![
+            Quant::new(Unit1942_2E::Infantry, 20),
+            Quant::new(Unit1942_2E::Artillery, 20),
+            Quant::new(Unit1942_2E::Tank, 20),
+            Quant::new(Unit1942_2E::Fighter, 20),
+            Quant::new(Unit1942_2E::Bomber, 20),
+            Quant::new(Unit1942_2E::BombardingCruiser, 20),
+            Quant::new(Unit1942_2E::BombardingBattleship, 20)
+        ],
     });
     let defenders = Force::new(QuantDist {
-        outcomes: vec![Quant::new(Unit1942_2E::Infantry, 1)],
+        outcomes: vec![
+            Quant::new(Unit1942_2E::Infantry, 30),
+            Quant::new(Unit1942_2E::Artillery, 20),
+            Quant::new(Unit1942_2E::Tank, 20),
+            Quant::new(Unit1942_2E::Fighter, 20),
+            Quant::new(Unit1942_2E::Bomber, 20),
+            Quant::new(Unit1942_2E::AntiAir, 20)
+        ],
     });
 
     let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
@@ -17,6 +32,7 @@ fn main() {
     let mut round_manager =
         RoundManager::new(combat_manager, sequence.clone(), attackers, defenders);
 
+    let start = std::time::SystemTime::now();
     while !round_manager.is_complete() {
         let round_index = round_manager.round_index() + 1;
         println!(
@@ -35,19 +51,30 @@ fn main() {
         );
     }
 
+    match start.elapsed() {
+        Ok(elapsed) => {
+            // it prints '2'
+            println!("Took {} seconds", elapsed.as_millis() as f64 / 2000.0);
+        }
+        Err(e) => {
+            // an error occurred!
+            println!("Timing error: {:?}", e);
+        }
+    }
+
     println!(
         "{} rounds and {} outcomes analyzed",
         round_manager.round_index(),
         stats.total_count()
     );
     println!("Winner      Prob.");
-    println!("Attack:    {:>5.2}%", stats.attacker_win_p() * 100.0);
-    println!("Defend:    {:>5.2}%", stats.defender_win_p() * 100.0);
-    println!("Draw:      {:>5.2}%", stats.draw_p() * 100.0);
+    println!("Attack:    {:>5.2}%", stats.attacker_win_p() * 200.0);
+    println!("Defend:    {:>5.2}%", stats.defender_win_p() * 200.0);
+    println!("Draw:      {:>5.2}%", stats.draw_p() * 200.0);
     if round_manager.last_round().stalemate {
         println!(
             "Stalemate: {:>5.2}%",
-            round_manager.last_round().total_probability() * 100.0
+            round_manager.last_round().total_probability() * 200.0
         );
     }
 
