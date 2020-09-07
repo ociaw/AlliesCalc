@@ -16,3 +16,5 @@ members = [
     "aa1942_2e"
 ]
 
+[profile.release]
+debug = true
