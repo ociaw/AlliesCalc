@@ -8,7 +8,7 @@ pub struct Probability {
     value: f64
 }
 
-const TOLERANCE: f64 = 0.000000000000001;
+const TOLERANCE: f64 = 0.000000000001;
 
 impl Probability {
     pub fn new(value: f64) -> Self {
