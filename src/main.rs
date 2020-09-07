@@ -68,13 +68,13 @@ fn main() {
         stats.total_count()
     );
     println!("Winner      Prob.");
-    println!("Attack:    {:>5.2}%", stats.attacker_win_p() * 200.0);
-    println!("Defend:    {:>5.2}%", stats.defender_win_p() * 200.0);
-    println!("Draw:      {:>5.2}%", stats.draw_p() * 200.0);
+    println!("Attack:    {:>5.2}%", stats.attacker_win_p() * 100.0);
+    println!("Defend:    {:>5.2}%", stats.defender_win_p() * 100.0);
+    println!("Draw:      {:>5.2}%", stats.draw_p() * 100.0);
     if round_manager.last_round().stalemate {
         println!(
             "Stalemate: {:>5.2}%",
-            round_manager.last_round().total_probability() * 200.0
+            round_manager.last_round().total_probability() * 100.0
         );
     }
 
