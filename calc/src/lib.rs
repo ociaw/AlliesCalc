@@ -1,3 +1,5 @@
+#![feature(or_insert_with_key)]
+
 mod combat;
 mod combat_manager;
 mod hit;
@@ -21,6 +23,7 @@ pub use probability::Probability;
 pub use pruner::Pruner;
 pub use quant::{Quant, QuantDist};
 pub use roll::{Roll, RollSelector};
+pub use roller::Roller;
 pub use round_manager::RoundManager;
 pub use round_result::RoundResult;
 pub use statistics::Statistics;

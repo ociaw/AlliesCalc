@@ -11,6 +11,7 @@ pub struct CombatManager<
     attacker_survivor_selector: TSurvivorSelector,
     defender_survivor_selector: TSurvivorSelector,
     roll_selector: TRollSelector,
+    roller: Roller<TUnit, THit>,
     phantom_combat_type: PhantomData<TCombatType>,
     phantom_hit: PhantomData<THit>,
     phantom_unit: PhantomData<TUnit>,
@@ -37,11 +38,12 @@ where
             phantom_combat_type: PhantomData,
             phantom_hit: PhantomData,
             phantom_unit: PhantomData,
+            roller: Default::default()
         }
     }
 
     pub fn resolve(
-        &self,
+        &mut self,
         combat: &Prob<Combat<TCombatType, TUnit>>,
         next_combat_type: TCombatType,
     ) -> CombatResult<TCombatType, TUnit> {
@@ -56,12 +58,13 @@ where
         let attack_strike = self.roll_selector.get_rolls(&attack_context);
         let defense_strike = self.roll_selector.get_rolls(&defense_context);
 
-        let attacking_hits = roll_hits(&attack_strike);
-        let defending_hits = roll_hits(&defense_strike);
+        let defending_hits = self.roller.roll_hits(defense_strike);
 
         let surviving_attackers = self
             .attacker_survivor_selector
             .select(attackers, &defending_hits);
+
+        let attacking_hits = self.roller.roll_hits(attack_strike);
         let surviving_defenders = self
             .defender_survivor_selector
             .select(defenders, &attacking_hits);

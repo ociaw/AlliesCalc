@@ -3,6 +3,24 @@ use statrs::distribution::{Binomial, Discrete};
 use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
+pub struct Roller<TUnit: Unit, THit: Hit<TUnit>> {
+    cache: HashMap<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>,
+}
+
+impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
+    pub fn roll_hits(&mut self, strike: QuantDist<Roll<TUnit, THit>>) -> &ProbDist<QuantDist<THit>> {
+        self.cache.entry(strike).or_insert_with_key(roll_hits)
+    }
+}
+
+impl<TUnit: Unit, THit: Hit<TUnit>> Default for Roller<TUnit, THit> {
+    fn default() -> Self {
+        Self {
+            cache: HashMap::<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>::new()
+        }
+    }
+}
+
 pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, THit>>) -> ProbDist<QuantDist<THit>> {
     use std::convert::TryInto;
 
