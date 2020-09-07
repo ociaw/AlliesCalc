@@ -113,4 +113,12 @@ where
     pub fn set_prune_threshold(&mut self, p: Probability) {
         self.pruner.threshold = p;
     }
+
+    pub fn pruned_count(&self) -> usize {
+        self.pruner.count
+    }
+
+    pub fn pruned_p(&self) -> Probability {
+        self.pruner.sum
+    }
 }
