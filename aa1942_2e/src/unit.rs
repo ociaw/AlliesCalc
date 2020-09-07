@@ -70,7 +70,7 @@ impl Unit {
 }
 
 impl calc::Unit for Unit {
-    fn ipc(&self) -> u32 {
+    fn ipc(self) -> u32 {
         match self {
             Unit::Infantry => 3,
             Unit::Artillery => 4,
@@ -86,6 +86,44 @@ impl calc::Unit for Unit {
             Unit::Carrier => 14,
             Unit::Battleship => 20,
             Unit::BattleshipDamaged => 20,
+        }
+    }
+
+    fn attack(self) -> u8 {
+        match self {
+            Unit::Infantry => 1,
+            Unit::Artillery => 2,
+            Unit::Tank => 3,
+            Unit::AntiAir => 0,
+            Unit::BombardingCruiser => 3,
+            Unit::BombardingBattleship => 4,
+            Unit::Fighter => 3,
+            Unit::Bomber => 4,
+            Unit::Submarine => 2,
+            Unit::Destroyer => 2,
+            Unit::Cruiser => 3,
+            Unit::Carrier => 1,
+            Unit::Battleship => 4,
+            Unit::BattleshipDamaged => 4,
+        }
+    }
+
+    fn defense(self) -> u8 {
+        match self {
+            Unit::Infantry => 2,
+            Unit::Artillery => 2,
+            Unit::Tank => 3,
+            Unit::AntiAir => 1,
+            Unit::BombardingCruiser => 0,
+            Unit::BombardingBattleship => 0,
+            Unit::Fighter => 4,
+            Unit::Bomber => 1,
+            Unit::Submarine => 1,
+            Unit::Destroyer => 2,
+            Unit::Cruiser => 3,
+            Unit::Carrier => 2,
+            Unit::Battleship => 4,
+            Unit::BattleshipDamaged => 4,
         }
     }
 }
