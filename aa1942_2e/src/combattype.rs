@@ -24,7 +24,10 @@ impl CombatType {
             .filter(|q| q.count > 0)
             .map(|q| q.item)
             .collect::<Vec<_>>();
-        if units.iter().any(|u| u.combat_type() == CombatType::Bombardment) {
+        if units
+            .iter()
+            .any(|u| u.combat_type() == CombatType::Bombardment)
+        {
             start.push(CombatType::Bombardment);
         }
         if units.iter().any(|u| u.combat_type() == CombatType::AntiAir) {
@@ -32,7 +35,10 @@ impl CombatType {
         }
 
         let mut cycle = Vec::new();
-        if units.iter().any(|u| u.combat_type() == CombatType::SurpriseStrike) {
+        if units
+            .iter()
+            .any(|u| u.combat_type() == CombatType::SurpriseStrike)
+        {
             cycle.push(CombatType::SurpriseStrike);
         }
         cycle.push(CombatType::General);

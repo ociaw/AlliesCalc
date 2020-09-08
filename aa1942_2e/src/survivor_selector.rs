@@ -81,7 +81,14 @@ impl SurvivorSelector {
             let remove_count = match reserved {
                 Some(reserved) if reserved == *unit => {
                     let candidate_count = candidates.count(&unit);
-                    std::cmp::min(count, if candidate_count > 1 { candidate_count - 1 } else { 0 })
+                    std::cmp::min(
+                        count,
+                        if candidate_count > 1 {
+                            candidate_count - 1
+                        } else {
+                            0
+                        },
+                    )
                 }
                 _ => count,
             };

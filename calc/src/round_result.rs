@@ -50,10 +50,12 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
             }
         }
         for attacker in attackers {
-            self.surviving_attackers.add(attacker * combat_result.probability);
+            self.surviving_attackers
+                .add(attacker * combat_result.probability);
         }
         for defender in defenders {
-            self.surviving_defenders.add(defender * combat_result.probability);
+            self.surviving_defenders
+                .add(defender * combat_result.probability);
         }
     }
 

@@ -5,7 +5,7 @@ use core::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Probability {
-    value: f64
+    value: f64,
 }
 
 const TOLERANCE: f64 = 0.000000000001;
@@ -15,46 +15,43 @@ impl Probability {
         use core::convert::TryInto;
         match value.try_into() {
             Err(_) => panic!("Probability value must be between 0 and 1."),
-            Ok(res) => res
+            Ok(res) => res,
         }
     }
 
     pub fn from_ratio(numer: u32, denom: u32) -> Self {
         if numer > denom {
-            panic!("Numerator must be less than or equal to denoinator. {} / {}", numer, denom);
+            panic!(
+                "Numerator must be less than or equal to denoinator. {} / {}",
+                numer, denom
+            );
         }
         if denom == 0 {
             panic!("Denominator must be non-zero.");
         }
         Self {
-            value: numer as f64 / denom as f64
+            value: numer as f64 / denom as f64,
         }
     }
 
     pub const fn zero() -> Self {
-        Self {
-            value: 0.0
-        }
+        Self { value: 0.0 }
     }
 
     pub const fn one() -> Self {
-        Self {
-            value: 1.0
-        }
+        Self { value: 1.0 }
     }
 }
 
 impl Sum for Probability {
-    fn sum<I: Iterator<Item=Self>>(iter: I) -> Self {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Self::zero(), Add::add)
     }
 }
 
 impl Default for Probability {
     fn default() -> Self {
-        Self {
-            value: 0.0
-        }
+        Self { value: 0.0 }
     }
 }
 
@@ -64,23 +61,24 @@ impl TryFrom<f64> for Probability {
         if value < 0.0 || value > 1.0 {
             Err("Probability value must be between 0 and 1.")
         } else {
-            Ok(Self {
-                value
-            })
+            Ok(Self { value })
         }
-     }
+    }
 }
 
 impl Add<Probability> for Probability {
     type Output = Self;
-    
-    fn add(self, rhs: Probability) -> Self::Output { 
+
+    fn add(self, rhs: Probability) -> Self::Output {
         let value = self.value + rhs.value;
         if value > 1.0 + TOLERANCE {
-            panic!("Add results in a probability greater than 1: {} + {}", self.value, rhs.value);
+            panic!(
+                "Add results in a probability greater than 1: {} + {}",
+                self.value, rhs.value
+            );
         }
         Self {
-            value: if value > 1.0 { 1.0 } else { value }
+            value: if value > 1.0 { 1.0 } else { value },
         }
     }
 }
@@ -93,18 +91,18 @@ impl AddAssign for Probability {
 
 impl Mul<Probability> for Probability {
     type Output = Self;
-    fn mul(self, rhs: Probability) -> Self::Output { 
+    fn mul(self, rhs: Probability) -> Self::Output {
         Self {
-            value: self.value * rhs.value
+            value: self.value * rhs.value,
         }
     }
 }
 
 impl Mul<f64> for Probability {
     type Output = Self;
-    fn mul(self, rhs: f64) -> Self::Output { 
+    fn mul(self, rhs: f64) -> Self::Output {
         Self {
-            value: self.value * rhs
+            value: self.value * rhs,
         }
     }
 }
@@ -116,9 +114,13 @@ impl MulAssign for Probability {
 }
 
 impl Display for Probability {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> { self.value.fmt(f) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        self.value.fmt(f)
+    }
 }
 
 impl From<Probability> for f64 {
-    fn from(value: Probability) -> Self { value.value }
+    fn from(value: Probability) -> Self {
+        value.value
+    }
 }

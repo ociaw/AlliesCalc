@@ -46,8 +46,7 @@ impl Context {
     }
 }
 
-impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
-{
+impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
     fn get_rolls(
         &self,
         context: &calc::CombatContext<CombatType, Unit>,
@@ -60,7 +59,9 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
             let unit = quant.item;
             let count = quant.count;
 
-            let unit_combat = if unit.combat_type() == CombatType::SurpriseStrike && context.hostile_unsurprisable {
+            let unit_combat = if unit.combat_type() == CombatType::SurpriseStrike
+                && context.hostile_unsurprisable
+            {
                 CombatType::General
             } else {
                 unit.combat_type()
@@ -72,13 +73,17 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
 
             let boosted_count = match unit.boosted_strength() {
                 Some(_) => core::cmp::min(context.boost_count, count),
-                None => 0
+                None => 0,
             };
             let base_count = count - boosted_count;
 
             let base_strength = {
                 use calc::Unit;
-                if context.defending { unit.defense() } else { unit.attack() }
+                if context.defending {
+                    unit.defense()
+                } else {
+                    unit.attack()
+                }
             };
             let boosted_strength = unit.boosted_strength().unwrap_or(0);
 

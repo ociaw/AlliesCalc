@@ -48,25 +48,21 @@ impl Unit {
             Unit::BombardingBattleship | Unit::BombardingCruiser => CombatType::Bombardment,
             Unit::AntiAir => CombatType::AntiAir,
             Unit::Submarine => CombatType::SurpriseStrike,
-            _ => CombatType::General
+            _ => CombatType::General,
         }
     }
 
     pub fn hit(self) -> crate::Hit {
         use crate::Hit;
         match self {
-            Unit::AntiAir => {
-                Hit::OnlyAirUnits
-            }
-            Unit::Submarine => {
-                Hit::NotAirUnits
-            }
-            Unit::Destroyer | Unit::Cruiser | Unit::Carrier | Unit::Battleship | Unit::BattleshipDamaged => {
-                Hit::AllUnits
-            }
-            _ => {
-                Hit::NotSubmarines
-            }
+            Unit::AntiAir => Hit::OnlyAirUnits,
+            Unit::Submarine => Hit::NotAirUnits,
+            Unit::Destroyer
+            | Unit::Cruiser
+            | Unit::Carrier
+            | Unit::Battleship
+            | Unit::BattleshipDamaged => Hit::AllUnits,
+            _ => Hit::NotSubmarines,
         }
     }
 

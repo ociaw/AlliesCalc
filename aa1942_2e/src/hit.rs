@@ -10,12 +10,13 @@ pub enum Hit {
 
 impl calc::Hit<crate::Unit> for Hit {
     fn hits(self, unit: Unit) -> bool {
-        unit.is_targetable() && match self {
-            Hit::AllUnits => true,
-            Hit::NotSubmarines => !unit.is_submarine(),
-            Hit::NotAirUnits => !unit.is_air(),
-            Hit::OnlyAirUnits => unit.is_air(),
-        }
+        unit.is_targetable()
+            && match self {
+                Hit::AllUnits => true,
+                Hit::NotSubmarines => !unit.is_submarine(),
+                Hit::NotAirUnits => !unit.is_air(),
+                Hit::OnlyAirUnits => unit.is_air(),
+            }
     }
 }
 

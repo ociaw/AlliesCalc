@@ -8,7 +8,10 @@ pub struct Roller<TUnit: Unit, THit: Hit<TUnit>> {
 }
 
 impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
-    pub fn roll_hits(&mut self, strike: QuantDist<Roll<TUnit, THit>>) -> &ProbDist<QuantDist<THit>> {
+    pub fn roll_hits(
+        &mut self,
+        strike: QuantDist<Roll<TUnit, THit>>,
+    ) -> &ProbDist<QuantDist<THit>> {
         self.cache.entry(strike).or_insert_with_key(roll_hits)
     }
 }
@@ -16,12 +19,14 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
 impl<TUnit: Unit, THit: Hit<TUnit>> Default for Roller<TUnit, THit> {
     fn default() -> Self {
         Self {
-            cache: HashMap::<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>::new()
+            cache: HashMap::<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>::new(),
         }
     }
 }
 
-pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, THit>>) -> ProbDist<QuantDist<THit>> {
+pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
+    strike: &QuantDist<Roll<TUnit, THit>>,
+) -> ProbDist<QuantDist<THit>> {
     use std::convert::TryInto;
 
     let mut hit_dists = HashMap::with_capacity(strike.outcomes.len());
@@ -53,7 +58,12 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(strike: &QuantDist<Roll<TUnit, T
     }
 
     let mut results = ProbDist::new();
-    combine_hit_dists(&mut hit_dists.iter(), &mut Vec::new(), Probability::one(), &mut results);
+    combine_hit_dists(
+        &mut hit_dists.iter(),
+        &mut Vec::new(),
+        Probability::one(),
+        &mut results,
+    );
     results
 }
 

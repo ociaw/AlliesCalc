@@ -11,7 +11,7 @@ fn main() {
             Quant::new(Unit1942_2E::Fighter, 20),
             Quant::new(Unit1942_2E::Bomber, 20),
             Quant::new(Unit1942_2E::BombardingCruiser, 20),
-            Quant::new(Unit1942_2E::BombardingBattleship, 20)
+            Quant::new(Unit1942_2E::BombardingBattleship, 20),
         ],
     });
     let defenders = Force::new(QuantDist {
@@ -21,7 +21,7 @@ fn main() {
             Quant::new(Unit1942_2E::Tank, 20),
             Quant::new(Unit1942_2E::Fighter, 20),
             Quant::new(Unit1942_2E::Bomber, 20),
-            Quant::new(Unit1942_2E::AntiAir, 20)
+            Quant::new(Unit1942_2E::AntiAir, 20),
         ],
     });
 

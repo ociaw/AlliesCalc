@@ -38,7 +38,7 @@ where
             phantom_combat_type: PhantomData,
             phantom_hit: PhantomData,
             phantom_unit: PhantomData,
-            roller: Default::default()
+            roller: Default::default(),
         }
     }
 
