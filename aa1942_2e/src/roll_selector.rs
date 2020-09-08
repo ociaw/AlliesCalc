@@ -7,10 +7,10 @@ pub struct RollSelector;
 struct Context {
     pub combat: CombatType,
     pub defending: bool,
-    pub friendly_artillery: u32,
-    pub hostile_air: u32,
-    pub friendly_destroyer: bool,
-    pub hostile_destroyer: bool,
+    pub boost_count: u32,
+    pub hostile_air_count: u32,
+    pub friendly_anti_sub: bool,
+    pub hostile_unsurprisable: bool,
 }
 
 impl Context {
@@ -18,30 +18,30 @@ impl Context {
         Context {
             combat: combat_context.combat_type,
             defending: combat_context.defending,
-            friendly_artillery: combat_context
+            boost_count: combat_context
                 .friendlies()
                 .outcomes
                 .iter()
-                .filter(|u| u.item == Unit::Artillery)
+                .filter(|u| u.item.is_booster())
                 .map(|u| u.count)
                 .sum(),
-            hostile_air: combat_context
+            hostile_air_count: combat_context
                 .hostiles()
                 .outcomes
                 .iter()
                 .filter(|u| u.item.is_air())
                 .map(|u| u.count)
                 .sum(),
-            friendly_destroyer: combat_context
+            friendly_anti_sub: combat_context
                 .friendlies()
                 .outcomes
                 .iter()
-                .any(|u| u.item == Unit::Destroyer && u.count > 0),
-            hostile_destroyer: combat_context
+                .any(|u| u.item.is_anti_sub() && u.count > 0),
+            hostile_unsurprisable: combat_context
                 .hostiles()
                 .outcomes
                 .iter()
-                .any(|u| u.item == Unit::Destroyer && u.count > 0),
+                .any(|u| u.item.is_unsurprisable() && u.count > 0),
         }
     }
 }
@@ -54,71 +54,51 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector
     ) -> calc::QuantDist<Roll<Unit, Hit>> {
         let force = context.friendlies();
         let context = Context::convert(context);
-        let combat = context.combat;
+        let current_combat = context.combat;
         let mut rolls = QuantDist { outcomes: vec![] };
         for quant in &force.outcomes {
             let unit = quant.item;
             let count = quant.count;
 
+            let unit_combat = if unit.combat_type() == CombatType::SurpriseStrike && context.hostile_unsurprisable {
+                CombatType::General
+            } else {
+                unit.combat_type()
+            };
+
+            if current_combat != unit_combat {
+                continue;
+            }
+
+            let boosted_count = match unit.boosted_strength() {
+                Some(_) => core::cmp::min(context.boost_count, count),
+                None => 0
+            };
+            let base_count = count - boosted_count;
+
             let base_strength = {
                 use calc::Unit;
                 if context.defending { unit.defense() } else { unit.attack() }
             };
+            let boosted_strength = unit.boosted_strength().unwrap_or(0);
 
-            match unit {
-                Unit::Infantry => {
-                    if combat == CombatType::General {
-                        if context.defending {
-                            rolls.add(Roll::new(base_strength, Hit::NotSubmarines), count);
-                        } else {
-                            let weak_count = if count < context.friendly_artillery { 0 } else { count - context.friendly_artillery };
-                            let strong_count = std::cmp::min(count, context.friendly_artillery);
-                            rolls.add(Roll::new(base_strength, Hit::NotSubmarines), weak_count);
-                            rolls.add(Roll::new(2, Hit::NotSubmarines), strong_count);
-                        }
-                    }
+            let hit = {
+                let hit = unit.hit();
+                if hit == Hit::NotSubmarines && context.friendly_anti_sub {
+                    Hit::AllUnits
+                } else {
+                    hit
                 }
-                Unit::Artillery | Unit::Tank => {
-                    if combat == CombatType::General {
-                        rolls.add(Roll::new(base_strength, Hit::NotSubmarines), count);
-                    }
-                }
-                Unit::AntiAir => {
-                    if combat == CombatType::AntiAir {
-                        rolls.add(
-                            Roll::new(base_strength, Hit::OnlyAirUnits),
-                            std::cmp::min(3, context.hostile_air) * count,
-                        );
-                    }
-                }
-                Unit::BombardingCruiser | Unit::BombardingBattleship => {
-                    if combat == CombatType::Bombardment {
-                        rolls.add(Roll::new(base_strength, Hit::NotSubmarines), count);
-                    }
-                }
-                Unit::Fighter | Unit::Bomber => {
-                    if combat == CombatType::General {
-                        let hit = if context.friendly_destroyer {
-                            Hit::AllUnits
-                        } else {
-                            Hit::NotSubmarines
-                        };
-                        rolls.add(Roll::new(base_strength, hit), count);
-                    }
-                }
-                Unit::Submarine => {
-                    if (combat == CombatType::SurpriseStrike && !context.hostile_destroyer)
-                        || (combat == CombatType::General && context.hostile_destroyer)
-                    {
-                        rolls.add(Roll::new(base_strength, Hit::NotAirUnits), count);
-                    }
-                }
-                Unit::Destroyer | Unit::Cruiser | Unit::Carrier | Unit::Battleship | Unit::BattleshipDamaged => {
-                    if combat == CombatType::General {
-                        rolls.add(Roll::new(base_strength, Hit::AllUnits), count);
-                    }
-                }
-            }
+            };
+
+            let multiplier = if unit.combat_type() == CombatType::AntiAir {
+                core::cmp::min(3, context.hostile_air_count)
+            } else {
+                1
+            };
+
+            rolls.add(Roll::new(base_strength, hit), base_count * multiplier);
+            rolls.add(Roll::new(boosted_strength, hit), boosted_count * multiplier);
         }
         rolls
     }

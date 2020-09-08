@@ -18,17 +18,7 @@ pub enum Unit {
 
 impl Unit {
     pub fn is_air(self) -> bool {
-        match self {
-            Unit::Fighter | Unit::Bomber => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_bombarding(self) -> bool {
-        match self {
-            Unit::BombardingCruiser | Unit::BombardingBattleship => true,
-            _ => false,
-        }
+        self == Unit::Fighter || self == Unit::Bomber
     }
 
     pub fn is_submarine(self) -> bool {
@@ -36,9 +26,55 @@ impl Unit {
     }
 
     pub fn is_targetable(self) -> bool {
+        !(self == Unit::BombardingCruiser || self == Unit::BombardingBattleship)
+    }
+
+    pub fn is_anti_sub(self) -> bool {
+        self == Unit::Destroyer
+    }
+
+    pub fn is_unsurprisable(self) -> bool {
+        self == Unit::Destroyer
+    }
+
+    pub fn is_booster(self) -> bool {
+        self == Unit::Artillery
+    }
+
+    pub fn combat_type(self) -> crate::CombatType {
+        use crate::CombatType;
+
         match self {
-            Unit::BombardingCruiser | Unit::BombardingBattleship => false,
-            _ => true,
+            Unit::BombardingBattleship | Unit::BombardingCruiser => CombatType::Bombardment,
+            Unit::AntiAir => CombatType::AntiAir,
+            Unit::Submarine => CombatType::SurpriseStrike,
+            _ => CombatType::General
+        }
+    }
+
+    pub fn hit(self) -> crate::Hit {
+        use crate::Hit;
+        match self {
+            Unit::AntiAir => {
+                Hit::OnlyAirUnits
+            }
+            Unit::Submarine => {
+                Hit::NotAirUnits
+            }
+            Unit::Destroyer | Unit::Cruiser | Unit::Carrier | Unit::Battleship | Unit::BattleshipDamaged => {
+                Hit::AllUnits
+            }
+            _ => {
+                Hit::NotSubmarines
+            }
+        }
+    }
+
+    pub fn boosted_strength(self) -> Option<u8> {
+        if self == Unit::Infantry {
+            Some(2)
+        } else {
+            None
         }
     }
 
