@@ -77,7 +77,7 @@ impl Statistics {
         &mut self,
         combat: &ProbDist<Combat<TCombatType, TUnit>>,
     ) {
-        for combat in &combat.outcomes {
+        for combat in combat.outcomes() {
             self.add(combat);
         }
     }
@@ -135,7 +135,7 @@ fn update_means(value: f64, p: Probability, total_p: Probability, mean: &mut f64
 
 fn sum_ipc<TUnit: Unit>(force: &Force<TUnit>) -> u32 {
     let mut sum = 0;
-    for quant in &force.outcomes {
+    for quant in force.outcomes() {
         sum += quant.count * quant.item.ipc();
     }
     sum

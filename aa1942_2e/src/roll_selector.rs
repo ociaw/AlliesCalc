@@ -1,5 +1,5 @@
 use crate::*;
-use calc::{QuantDist, Roll};
+use calc::{QuantDistBuilder, Roll};
 
 pub struct RollSelector;
 
@@ -20,26 +20,26 @@ impl Context {
             defending: combat_context.defending,
             boost_count: combat_context
                 .friendlies()
-                .outcomes
+                .outcomes()
                 .iter()
                 .filter(|u| u.item.is_booster())
                 .map(|u| u.count)
                 .sum(),
             hostile_air_count: combat_context
                 .hostiles()
-                .outcomes
+                .outcomes()
                 .iter()
                 .filter(|u| u.item.is_air())
                 .map(|u| u.count)
                 .sum(),
             friendly_anti_sub: combat_context
                 .friendlies()
-                .outcomes
+                .outcomes()
                 .iter()
                 .any(|u| u.item.is_anti_sub() && u.count > 0),
             hostile_unsurprisable: combat_context
                 .hostiles()
-                .outcomes
+                .outcomes()
                 .iter()
                 .any(|u| u.item.is_unsurprisable() && u.count > 0),
         }
@@ -54,8 +54,8 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
         let force = context.friendlies();
         let context = Context::convert(context);
         let current_combat = context.combat;
-        let mut rolls = QuantDist { outcomes: vec![] };
-        for quant in &force.outcomes {
+        let mut rolls = QuantDistBuilder::with_capacity(force.outcomes().len());
+        for quant in force.outcomes() {
             let unit = quant.item;
             let count = quant.count;
 
@@ -105,6 +105,6 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
             rolls.add(Roll::new(base_strength, hit), base_count * multiplier);
             rolls.add(Roll::new(boosted_strength, hit), boosted_count * multiplier);
         }
-        rolls
+        rolls.build()
     }
 }

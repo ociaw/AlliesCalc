@@ -1,10 +1,18 @@
 use crate::Probability;
+use core::hash::Hash;
+use std::collections::HashMap;
 use std::ops::Mul;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Prob<T> {
     pub item: T,
     pub p: Probability,
+}
+
+impl<T> Prob<T> {
+    pub fn new(item: T, p: Probability) -> Prob<T> {
+        Prob { item, p }
+    }
 }
 
 impl<T> Mul<Probability> for Prob<T> {
@@ -20,20 +28,30 @@ impl<T> Mul<Probability> for Prob<T> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProbDist<T> {
-    pub outcomes: Vec<Prob<T>>,
+    outcomes: Vec<Prob<T>>,
 }
 
 impl<T> ProbDist<T> {
-    pub fn new() -> ProbDist<T> {
-        ProbDist {
-            outcomes: Vec::<Prob<T>>::new(),
-        }
+    pub fn outcomes(&self) -> &[Prob<T>] {
+        &self.outcomes
     }
 
-    pub fn with_capacity(capacity: usize) -> ProbDist<T> {
-        ProbDist {
-            outcomes: Vec::<Prob<T>>::with_capacity(capacity),
+    pub fn len(&self) -> usize {
+        self.outcomes.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.outcomes.is_empty()
+    }
+}
+
+impl<T: Eq + Hash> From<Vec<Prob<T>>> for ProbDist<T> {
+    fn from(outcomes: Vec<Prob<T>>) -> Self {
+        let mut builder = ProbDistBuilder::with_capacity(outcomes.len());
+        for outcome in outcomes.into_iter() {
+            builder.add_prob(outcome);
         }
+        builder.build()
     }
 }
 
@@ -45,18 +63,71 @@ impl<T> Default for ProbDist<T> {
     }
 }
 
-impl<T: Eq> ProbDist<T> {
-    pub fn add(&mut self, outcome: Prob<T>) {
-        match self.outcomes.iter().position(|o| o.item == outcome.item) {
-            Some(index) => {
-                self.outcomes[index] = Prob {
-                    item: outcome.item,
-                    p: self.outcomes[index].p + outcome.p,
-                };
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProbDistBuilder<T: Eq + Hash> {
+    outcomes: HashMap<T, Probability>,
+}
+
+impl<T: Eq + Hash> ProbDistBuilder<T> {
+    pub fn new() -> Self {
+        Self {
+            outcomes: HashMap::<T, Probability>::new(),
+        }
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            outcomes: HashMap::<T, Probability>::with_capacity(capacity),
+        }
+    }
+
+    pub fn build(self) -> ProbDist<T> {
+        ProbDist {
+            outcomes: self
+                .outcomes
+                .into_iter()
+                .map(|t| Prob::new(t.0, t.1))
+                .collect(),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.outcomes.len()
+    }
+}
+
+impl<T: Eq + Hash> Default for ProbDistBuilder<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: Eq + Hash> ProbDistBuilder<T> {
+    pub fn add(&mut self, item: T, p: Probability) {
+        self.add_prob(Prob::new(item, p));
+    }
+
+    pub fn add_prob(&mut self, prob: Prob<T>) {
+        if prob.p == Probability::zero() {
+            return;
+        }
+        match self.outcomes.entry(prob.item) {
+            std::collections::hash_map::Entry::Occupied(mut occupied) => {
+                *occupied.get_mut() += prob.p;
             }
-            None => {
-                self.outcomes.push(outcome);
+            std::collections::hash_map::Entry::Vacant(vacant) => {
+                vacant.insert(prob.p);
             }
         }
+    }
+}
+
+impl<T: Eq + Hash> From<ProbDist<T>> for ProbDistBuilder<T> {
+    fn from(dist: ProbDist<T>) -> Self {
+        let mut outcomes = HashMap::with_capacity(dist.len());
+        for outcome in dist.outcomes.into_iter() {
+            outcomes.insert(outcome.item, outcome.p);
+        }
+        ProbDistBuilder { outcomes }
     }
 }

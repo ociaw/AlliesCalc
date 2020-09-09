@@ -3,8 +3,8 @@ use aa1942_2e::Unit as Unit1942_2E;
 use calc::*;
 
 fn main() {
-    let attackers = Force::new(QuantDist {
-        outcomes: vec![
+    let attackers = Force::new(
+        vec![
             Quant::new(Unit1942_2E::Infantry, 20),
             Quant::new(Unit1942_2E::Artillery, 20),
             Quant::new(Unit1942_2E::Tank, 20),
@@ -12,18 +12,20 @@ fn main() {
             Quant::new(Unit1942_2E::Bomber, 20),
             Quant::new(Unit1942_2E::BombardingCruiser, 20),
             Quant::new(Unit1942_2E::BombardingBattleship, 20),
-        ],
-    });
-    let defenders = Force::new(QuantDist {
-        outcomes: vec![
+        ]
+        .into(),
+    );
+    let defenders = Force::new(
+        vec![
             Quant::new(Unit1942_2E::Infantry, 30),
             Quant::new(Unit1942_2E::Artillery, 20),
             Quant::new(Unit1942_2E::Tank, 20),
             Quant::new(Unit1942_2E::Fighter, 20),
             Quant::new(Unit1942_2E::Bomber, 20),
             Quant::new(Unit1942_2E::AntiAir, 20),
-        ],
-    });
+        ]
+        .into(),
+    );
 
     let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
     let combat_manager = aa1942_2e::get_combat_manager();
@@ -45,8 +47,8 @@ fn main() {
 
         println!(
             "Pending: {}, Completed: {}, ∑P: {:>9.6}",
-            last_round.pending.outcomes.len(),
-            last_round.completed.outcomes.len(),
+            last_round.pending.len(),
+            last_round.completed.len(),
             last_round.total_probability()
         );
     }

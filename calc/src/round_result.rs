@@ -1,4 +1,7 @@
-use crate::{Combat, CombatResult, CombatType, Force, Prob, ProbDist, Probability, Pruner, Unit};
+use crate::{
+    Combat, CombatResult, CombatType, Force, Prob, ProbDist, ProbDistBuilder, Probability, Pruner,
+    Unit,
+};
 
 #[derive(Debug)]
 pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
@@ -7,6 +10,7 @@ pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
     pub pruned: ProbDist<Combat<TCombatType, TUnit>>,
     pub surviving_attackers: ProbDist<Force<TUnit>>,
     pub surviving_defenders: ProbDist<Force<TUnit>>,
+    pub total_probability: Probability,
     pub stalemate: bool,
 }
 
@@ -18,17 +22,100 @@ impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResult<TCombatType, 
             pruned: ProbDist::default(),
             surviving_attackers: ProbDist::default(),
             surviving_defenders: ProbDist::default(),
+            total_probability: Probability::zero(),
             stalemate: false,
         }
     }
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
+    pub fn new(
+        combat_type: TCombatType,
+        attackers: Force<TUnit>,
+        defenders: Force<TUnit>,
+    ) -> RoundResult<TCombatType, TUnit> {
+        RoundResult {
+            pending: vec![Prob {
+                item: Combat {
+                    attackers: attackers.clone(),
+                    defenders: defenders.clone(),
+                    combat_type,
+                },
+                p: Probability::one(),
+            }]
+            .into(),
+            completed: ProbDist::default(),
+            pruned: ProbDist::default(),
+            surviving_attackers: vec![Prob {
+                item: attackers,
+                p: Probability::one(),
+            }]
+            .into(),
+            surviving_defenders: vec![Prob {
+                item: defenders,
+                p: Probability::one(),
+            }]
+            .into(),
+            total_probability: Probability::one(),
+            stalemate: false,
+        }
+    }
+    pub fn is_complete(&self) -> bool {
+        self.pending.is_empty() || self.stalemate
+    }
+
+    pub fn total_probability(&self) -> Probability {
+        self.total_probability
+    }
+}
+
+#[derive(Debug)]
+pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
+    pub pending: ProbDistBuilder<Combat<TCombatType, TUnit>>,
+    pub completed: ProbDistBuilder<Combat<TCombatType, TUnit>>,
+    pub pruned: ProbDistBuilder<Combat<TCombatType, TUnit>>,
+    pub surviving_attackers: ProbDistBuilder<Force<TUnit>>,
+    pub surviving_defenders: ProbDistBuilder<Force<TUnit>>,
+}
+
+impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit> {
+    pub fn new() -> RoundResultBuilder<TCombatType, TUnit> {
+        RoundResultBuilder {
+            pending: ProbDistBuilder::default(),
+            completed: ProbDistBuilder::default(),
+            pruned: ProbDistBuilder::default(),
+            surviving_attackers: ProbDistBuilder::default(),
+            surviving_defenders: ProbDistBuilder::default(),
+        }
+    }
+
+    pub fn build(self) -> RoundResult<TCombatType, TUnit> {
+        let pending = self.pending.build();
+        let completed = self.completed.build();
+        let pruned = self.pruned.build();
+        let total_probability = pending
+            .outcomes()
+            .iter()
+            .chain(completed.outcomes())
+            .chain(pruned.outcomes())
+            .map(|o| o.p)
+            .sum();
+        RoundResult {
+            pending,
+            completed,
+            pruned,
+            surviving_attackers: self.surviving_attackers.build(),
+            surviving_defenders: self.surviving_defenders.build(),
+            total_probability,
+            stalemate: false,
+        }
+    }
+
     pub fn add(&mut self, combat_result: CombatResult<TCombatType, TUnit>, pruner: &mut Pruner) {
-        let attackers = combat_result.surviving_attackers.outcomes;
-        let defenders = combat_result.surviving_defenders.outcomes;
-        for attacker in &attackers {
-            for defender in &defenders {
+        let attackers = combat_result.surviving_attackers.outcomes();
+        let defenders = combat_result.surviving_defenders.outcomes();
+        for attacker in attackers {
+            for defender in defenders {
                 let p = combat_result.probability * attacker.p * defender.p;
                 let combat = Combat {
                     attackers: attacker.item.clone(),
@@ -39,37 +126,27 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
                 let combat = Prob { item: combat, p };
                 if pruner.prune(&combat) {
                     // Only track up to 100 pruned outcomes - otherwise they can get out of control.
-                    if self.pruned.outcomes.len() < 100 {
-                        self.pruned.add(combat);
+                    if self.pruned.len() < 100 {
+                        self.pruned.add_prob(combat);
                     }
                 } else if combat.item.completed() {
-                    self.completed.add(combat);
+                    self.completed.add_prob(combat);
                 } else {
-                    self.pending.add(combat);
+                    self.pending.add_prob(combat);
                 }
             }
         }
         for attacker in attackers {
-            self.surviving_attackers
-                .add(attacker * combat_result.probability);
+            self.surviving_attackers.add(
+                attacker.item.clone(),
+                attacker.p * combat_result.probability,
+            );
         }
         for defender in defenders {
-            self.surviving_defenders
-                .add(defender * combat_result.probability);
+            self.surviving_defenders.add(
+                defender.item.clone(),
+                defender.p * combat_result.probability,
+            );
         }
-    }
-
-    pub fn is_complete(&self) -> bool {
-        self.pending.outcomes.is_empty() || self.stalemate
-    }
-
-    pub fn total_probability(&self) -> Probability {
-        self.pending
-            .outcomes
-            .iter()
-            .chain(self.completed.outcomes.iter())
-            .chain(self.pruned.outcomes.iter())
-            .map(|o| o.p)
-            .sum()
     }
 }

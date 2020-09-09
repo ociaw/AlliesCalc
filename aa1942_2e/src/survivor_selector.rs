@@ -1,5 +1,5 @@
 use crate::*;
-use calc::{Force, Prob, ProbDist, QuantDist};
+use calc::{Force, ProbDist, QuantDistBuilder};
 use std::rc::Rc;
 
 pub struct SurvivorSelector {
@@ -47,9 +47,7 @@ impl SurvivorSelector {
         candidates: &QuantDist<Unit>,
         hits: &QuantDist<Hit>,
     ) -> QuantDist<Unit> {
-        let mut survivors = QuantDist {
-            outcomes: candidates.outcomes.to_vec(),
-        };
+        let mut survivors: QuantDistBuilder<Unit> = candidates.clone().into();
         for hit in &Hit::order() {
             let mut count = hits.count(hit);
             count -= self.remove_dead(&mut survivors, *hit, count, self.reserved);
@@ -58,12 +56,12 @@ impl SurvivorSelector {
                 self.remove_dead(&mut survivors, *hit, count, None);
             }
         }
-        survivors
+        survivors.build()
     }
 
     fn remove_dead(
         &self,
-        candidates: &mut QuantDist<Unit>,
+        candidates: &mut QuantDistBuilder<Unit>,
         hit: Hit,
         count: u32,
         reserved: Option<Unit>,
@@ -110,14 +108,14 @@ impl SurvivorSelector {
     }
 
     fn without_nontargetable(force: &QuantDist<Unit>) -> QuantDist<Unit> {
-        let mut force = force.clone();
+        let mut force: QuantDistBuilder<Unit> = force.clone().into();
         for unit in &Unit::all() {
             if unit.is_targetable() {
                 continue;
             }
             force.remove_all(&unit);
         }
-        force
+        force.build()
     }
 }
 
@@ -127,15 +125,12 @@ impl calc::SurvivorSelector<Unit, Hit> for SurvivorSelector {
         starting_force: &QuantDist<Unit>,
         hit_dists: &ProbDist<QuantDist<Hit>>,
     ) -> ProbDist<Force<Unit>> {
-        let mut result = ProbDist::<Force<Unit>>::new();
+        let mut result = ProbDistBuilder::<Force<Unit>>::new();
         let starting_force = &Self::without_nontargetable(starting_force);
-        for hit_dist in &hit_dists.outcomes {
+        for hit_dist in hit_dists.outcomes() {
             let survivors = self.select_survivors(starting_force, &hit_dist.item);
-            result.add(Prob {
-                item: Rc::new(survivors),
-                p: hit_dist.p,
-            });
+            result.add(Rc::new(survivors), hit_dist.p);
         }
-        result
+        result.build()
     }
 }

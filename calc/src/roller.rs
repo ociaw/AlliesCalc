@@ -29,22 +29,20 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
 ) -> ProbDist<QuantDist<THit>> {
     use std::convert::TryInto;
 
-    let mut hit_dists = HashMap::with_capacity(strike.outcomes.len());
-    for quant in &strike.outcomes {
+    let mut hit_dists = HashMap::with_capacity(strike.outcomes().len());
+    for quant in strike.outcomes() {
         let roll = quant.item;
         let roll_count = quant.count;
         let hit = roll.hit;
         let p = roll.strength as f64 / 6.0;
         let binomial = Binomial::new(p, roll_count as u64).unwrap();
 
-        let mut dist = ProbDist::with_capacity(roll_count as usize);
+        let mut dist = ProbDistBuilder::with_capacity(roll_count as usize);
         for hit_count in 0..=roll_count {
             let mass = binomial.pmf(hit_count as u64);
-            dist.add(Prob {
-                item: hit_count,
-                p: mass.try_into().unwrap(),
-            });
+            dist.add(hit_count, mass.try_into().unwrap());
         }
+        let dist = dist.build();
 
         let entry = hit_dists.entry(hit);
         match entry {
@@ -57,46 +55,47 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
         }
     }
 
-    let mut results = ProbDist::new();
+    let mut results = ProbDistBuilder::new();
     combine_hit_dists(
         &mut hit_dists.iter(),
         &mut Vec::new(),
         Probability::one(),
         &mut results,
     );
-    results
+    results.build()
 }
 
 fn combine_dists(destination: &ProbDist<u32>, source: &ProbDist<u32>) -> ProbDist<u32> {
-    let mut result = ProbDist::with_capacity(destination.outcomes.len());
-    for first in &destination.outcomes {
-        for second in &source.outcomes {
+    let mut result = ProbDistBuilder::with_capacity(destination.len());
+    for first in destination.outcomes() {
+        for second in source.outcomes() {
             let hit_count = first.item + second.item;
             let p = first.p * second.p;
-            result.add(Prob { item: hit_count, p });
+            result.add(hit_count, p);
         }
     }
-    result
+    result.build()
 }
 
 fn combine_hit_dists<TUnit: Unit, THit: Hit<TUnit>>(
     hit_dists: &mut Iter<THit, ProbDist<u32>>,
     hit_stack: &mut Vec<Quant<THit>>,
     current_p: Probability,
-    results: &mut ProbDist<QuantDist<THit>>,
+    results: &mut ProbDistBuilder<QuantDist<THit>>,
 ) {
     match hit_dists.next() {
         None => {
-            let item = QuantDist {
-                outcomes: hit_stack.to_vec(),
-            };
-            results.add(Prob { item, p: current_p });
+            let mut builder = QuantDistBuilder::with_capacity(hit_stack.len());
+            for hit in hit_stack.iter() {
+                builder.add(hit.item, hit.count);
+            }
+            results.add(builder.build(), current_p);
             if hit_stack.is_empty() {
                 return;
             }
         }
         Some((hit, dist)) => {
-            for prob in &dist.outcomes {
+            for prob in dist.outcomes() {
                 hit_stack.push(Quant {
                     item: *hit,
                     count: prob.item,

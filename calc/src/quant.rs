@@ -14,22 +14,32 @@ impl<T> Quant<T> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QuantDist<T> {
-    pub outcomes: Vec<Quant<T>>,
+    outcomes: Vec<Quant<T>>,
 }
 
 impl<T> QuantDist<T> {
-    pub fn new() -> Self {
-        Self {
-            outcomes: Vec::<Quant<T>>::new(),
-        }
+    pub fn outcomes(&self) -> &[Quant<T>] {
+        &self.outcomes
     }
 
-    pub fn with_capacity(capacity: usize) -> Self {
-        Self {
-            outcomes: Vec::<Quant<T>>::with_capacity(capacity),
+    pub fn len(&self) -> usize {
+        self.outcomes.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.outcomes.is_empty()
+    }
+}
+
+impl<T: Eq> From<Vec<Quant<T>>> for QuantDist<T> {
+    fn from(outcomes: Vec<Quant<T>>) -> Self {
+        let mut builder = QuantDistBuilder::with_capacity(outcomes.len());
+        for outcome in outcomes.into_iter() {
+            builder.add_quant(outcome);
         }
+        builder.build()
     }
 }
 
@@ -42,14 +52,64 @@ impl<T> Default for QuantDist<T> {
 }
 
 impl<T: Eq> QuantDist<T> {
+    pub fn count(&self, item: &T) -> u32 {
+        match self.find_index(item) {
+            Some(index) => self.outcomes[index].count,
+            None => 0,
+        }
+    }
+
+    fn find_index(&self, item: &T) -> Option<usize> {
+        self.outcomes.iter().position(|q| &q.item == item)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QuantDistBuilder<T: Eq> {
+    outcomes: Vec<Quant<T>>,
+}
+
+impl<T: Eq> QuantDistBuilder<T> {
+    pub fn new() -> Self {
+        Self {
+            outcomes: Vec::<Quant<T>>::new(),
+        }
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            outcomes: Vec::<Quant<T>>::with_capacity(capacity),
+        }
+    }
+
+    pub fn build(self) -> QuantDist<T> {
+        QuantDist {
+            outcomes: self.outcomes,
+        }
+    }
+}
+
+impl<T: Eq> Default for QuantDistBuilder<T> {
+    fn default() -> Self {
+        Self {
+            outcomes: Vec::<Quant<T>>::new(),
+        }
+    }
+}
+
+impl<T: Eq> QuantDistBuilder<T> {
     pub fn add(&mut self, item: T, count: u32) {
-        if count == 0 {
+        self.add_quant(Quant::new(item, count));
+    }
+
+    pub fn add_quant(&mut self, quant: Quant<T>) {
+        if quant.count == 0 {
             return;
         }
-        let index = self.find_index(&item);
+        let index = self.find_index(&quant.item);
         match index {
-            Some(index) => self.outcomes[index].count += count,
-            None => self.outcomes.push(Quant::new(item, count)),
+            Some(index) => self.outcomes[index].count += quant.count,
+            None => self.outcomes.push(quant),
         };
     }
 
@@ -92,5 +152,13 @@ impl<T: Eq> QuantDist<T> {
 
     fn find_index(&self, item: &T) -> Option<usize> {
         self.outcomes.iter().position(|q| &q.item == item)
+    }
+}
+
+impl<T: Eq> From<QuantDist<T>> for QuantDistBuilder<T> {
+    fn from(dist: QuantDist<T>) -> Self {
+        QuantDistBuilder {
+            outcomes: dist.outcomes,
+        }
     }
 }

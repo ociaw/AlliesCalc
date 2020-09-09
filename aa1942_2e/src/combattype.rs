@@ -18,9 +18,9 @@ impl CombatType {
         let mut start = Vec::new();
 
         let units = attackers
-            .outcomes
+            .outcomes()
             .iter()
-            .chain(defenders.outcomes.iter())
+            .chain(defenders.outcomes().iter())
             .filter(|q| q.count > 0)
             .map(|q| q.item)
             .collect::<Vec<_>>();

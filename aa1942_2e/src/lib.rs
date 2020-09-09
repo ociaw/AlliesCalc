@@ -37,12 +37,8 @@ mod tests {
 
     #[test]
     fn bombardment() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::BombardingBattleship, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Infantry, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::BombardingBattleship, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::Infantry, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
@@ -66,12 +62,8 @@ mod tests {
 
     #[test]
     fn surprise_strike() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Submarine, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Cruiser, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Submarine, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::Cruiser, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
@@ -104,12 +96,8 @@ mod tests {
 
     #[test]
     fn surprise_strike_cancel() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Submarine, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Destroyer, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Submarine, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::Destroyer, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
@@ -120,37 +108,41 @@ mod tests {
 
     #[test]
     fn artillery_boost() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![
+        let attackers = Force::new(
+            vec![
                 Quant::new(Unit::Infantry, 1),
                 Quant::new(Unit::Artillery, 1),
-            ],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![
+            ]
+            .into(),
+        );
+        let defenders = Force::new(
+            vec![
                 Quant::new(Unit::Infantry, 1),
                 Quant::new(Unit::Artillery, 1),
-            ],
-        });
+            ]
+            .into(),
+        );
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
 
-        assert_eq!(stats.attacker_win_p(), stats.defender_win_p());
+        assert!(approx_eq!(f64, stats.attacker_win_p().into(), stats.defender_win_p().into(), ulps = 1));
         assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 1));
 
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![
+        let attackers = Force::new(
+            vec![
                 Quant::new(Unit::Infantry, 2),
                 Quant::new(Unit::Artillery, 1),
-            ],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![
+            ]
+            .into(),
+        );
+        let defenders = Force::new(
+            vec![
                 Quant::new(Unit::Infantry, 2),
                 Quant::new(Unit::Artillery, 1),
-            ],
-        });
+            ]
+            .into(),
+        );
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
@@ -161,12 +153,8 @@ mod tests {
 
     #[test]
     fn sub_plane_stalemate() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Submarine, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Submarine, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::Fighter, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
@@ -183,12 +171,9 @@ mod tests {
 
     #[test]
     fn sub_plane_destroyer() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Submarine, 2)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 1), Quant::new(Unit::Destroyer, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Submarine, 2)].into());
+        let defenders =
+            Force::new(vec![Quant::new(Unit::Fighter, 1), Quant::new(Unit::Destroyer, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -202,21 +187,19 @@ mod tests {
             ulps = 2
         ));
         assert_eq!(stats.draw_p(), Probability::zero());
-        assert_eq!(
-            last_round.total_probability(),
-            Probability::from_ratio(845, 1679)
-        );
+        assert!(approx_eq!(
+            f64,
+            last_round.total_probability().into(),
+            Probability::from_ratio(845, 1679).into(),
+            ulps = 2
+        ));
         assert!(round_manager.last_round().stalemate);
     }
 
     #[test]
     fn antiair() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::AntiAir, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Fighter, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::AntiAir, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -237,9 +220,7 @@ mod tests {
         assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 2)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Fighter, 2)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -259,9 +240,8 @@ mod tests {
         assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 1)],
-        });
+        let attackers =
+            Force::new(vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -281,9 +261,8 @@ mod tests {
         assert_eq!(last_round.total_probability(), Probability::zero());
         assert!(!round_manager.last_round().stalemate);
 
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 2)],
-        });
+        let attackers =
+            Force::new(vec![Quant::new(Unit::Fighter, 2), Quant::new(Unit::Bomber, 2)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders.clone());
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -301,12 +280,8 @@ mod tests {
 
     #[test]
     fn battleship_undamaged() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Bomber, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Battleship, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Bomber, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::Battleship, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -326,12 +301,8 @@ mod tests {
 
     #[test]
     fn battleship_damaged() {
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Bomber, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::BattleshipDamaged, 1)],
-        });
+        let attackers = Force::new(vec![Quant::new(Unit::Bomber, 1)].into());
+        let defenders = Force::new(vec![Quant::new(Unit::BattleshipDamaged, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -356,12 +327,10 @@ mod tests {
     #[test]
     fn reserve_tank() {
         // One tank is reserved by default
-        let attackers = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Bomber, 1)],
-        });
-        let defenders = Force::new(QuantDist {
-            outcomes: vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Fighter, 1)],
-        });
+        let attackers =
+            Force::new(vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Bomber, 1)].into());
+        let defenders =
+            Force::new(vec![Quant::new(Unit::Tank, 1), Quant::new(Unit::Fighter, 1)].into());
 
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         let last_round = run_to_completion(&mut round_manager, &mut stats);
@@ -371,19 +340,19 @@ mod tests {
             f64,
             stats.attacker_win_p().into(),
             2351.0 / 6545.0,
-            ulps = 1
+            ulps = 2
         ));
         assert!(approx_eq!(
             f64,
             stats.defender_win_p().into(),
             2726.0 / 6545.0,
-            ulps = 1
+            ulps = 2
         ));
         assert!(approx_eq!(
             f64,
             stats.draw_p().into(),
             1468.0 / 6545.0,
-            ulps = 1
+            ulps = 2
         ));
 
         assert_eq!(last_round.total_probability(), Probability::zero());

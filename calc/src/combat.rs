@@ -49,7 +49,7 @@ pub enum Side {
     Defender,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Combat<TCombatType, TUnit>
 where
     TCombatType: CombatType,
@@ -66,10 +66,7 @@ where
     TUnit: Unit,
 {
     pub fn winner(&self) -> Option<Side> {
-        match (
-            self.attackers.outcomes.is_empty(),
-            self.defenders.outcomes.is_empty(),
-        ) {
+        match (self.attackers.is_empty(), self.defenders.is_empty()) {
             (true, false) => Some(Side::Defender),
             (false, true) => Some(Side::Attacker),
             _ => None,
@@ -77,7 +74,7 @@ where
     }
 
     pub fn completed(&self) -> bool {
-        self.attackers.outcomes.is_empty() || self.defenders.outcomes.is_empty()
+        self.attackers.is_empty() || self.defenders.is_empty()
     }
 }
 

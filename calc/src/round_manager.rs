@@ -38,33 +38,7 @@ where
             sequence,
             pruner: Default::default(),
             round_index,
-            last_round: RoundResult {
-                pending: ProbDist {
-                    outcomes: vec![Prob {
-                        item: Combat {
-                            attackers: attackers.clone(),
-                            defenders: defenders.clone(),
-                            combat_type,
-                        },
-                        p: Probability::one(),
-                    }],
-                },
-                completed: ProbDist::new(),
-                pruned: ProbDist::new(),
-                surviving_attackers: ProbDist {
-                    outcomes: vec![Prob {
-                        item: attackers,
-                        p: Probability::one(),
-                    }],
-                },
-                surviving_defenders: ProbDist {
-                    outcomes: vec![Prob {
-                        item: defenders,
-                        p: Probability::one(),
-                    }],
-                },
-                stalemate: false,
-            },
+            last_round: RoundResult::new(combat_type, attackers, defenders),
             last_probability: Probability::zero(),
             probability_run_count: 0,
         }
@@ -74,24 +48,24 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
         let next_combat_type = self.sequence.combat_at(self.round_index + 1);
-        let mut result = RoundResult::default();
-        for combat in &self.last_round.pending.outcomes {
+        let mut result = RoundResultBuilder::new();
+        for combat in self.last_round.pending.outcomes() {
             let combat_result = self.combat_manager.resolve(combat, next_combat_type);
             result.add(combat_result, &mut self.pruner);
         }
 
+        let mut result = result.build();
         // We check if the current probability and the last probability are *exactly* the same;
         // if so, this may mean that we're reaching a stalemate: a point where neither side can
         // hit each other. If this happens 4 times in a row, we consider ourselves to be
         // stalemated and mark the result accordingly.
         const STALEMATE_THRESHOLD: usize = 4;
-        let total_probability = result.total_probability();
-        if total_probability == self.last_probability {
+        if result.total_probability() == self.last_probability {
             self.probability_run_count += 1;
             result.stalemate = self.probability_run_count >= STALEMATE_THRESHOLD;
         } else {
             self.probability_run_count = 0;
-            self.last_probability = total_probability;
+            self.last_probability = result.total_probability();
         }
 
         self.last_round = result;
