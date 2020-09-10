@@ -1,28 +1,29 @@
 use aa1942_2e::CombatType as CombatType1942_2E;
 use aa1942_2e::Unit as Unit1942_2E;
 use calc::*;
+use std::convert::TryInto;
 
 fn main() {
     let attackers = Force::new(
         vec![
-            Quant::new(Unit1942_2E::Infantry, 20),
-            Quant::new(Unit1942_2E::Artillery, 20),
-            Quant::new(Unit1942_2E::Tank, 20),
-            Quant::new(Unit1942_2E::Fighter, 20),
-            Quant::new(Unit1942_2E::Bomber, 20),
-            Quant::new(Unit1942_2E::BombardingCruiser, 20),
-            Quant::new(Unit1942_2E::BombardingBattleship, 20),
+            Quant::new(Unit1942_2E::Infantry, 40),
+            Quant::new(Unit1942_2E::Artillery, 40),
+            Quant::new(Unit1942_2E::Tank, 40),
+            Quant::new(Unit1942_2E::Fighter, 40),
+            Quant::new(Unit1942_2E::Bomber, 40),
+            Quant::new(Unit1942_2E::BombardingCruiser, 40),
+            Quant::new(Unit1942_2E::BombardingBattleship, 40),
         ]
         .into(),
     );
     let defenders = Force::new(
         vec![
-            Quant::new(Unit1942_2E::Infantry, 30),
-            Quant::new(Unit1942_2E::Artillery, 20),
-            Quant::new(Unit1942_2E::Tank, 20),
-            Quant::new(Unit1942_2E::Fighter, 20),
-            Quant::new(Unit1942_2E::Bomber, 20),
-            Quant::new(Unit1942_2E::AntiAir, 20),
+            Quant::new(Unit1942_2E::Infantry, 55),
+            Quant::new(Unit1942_2E::Artillery, 40),
+            Quant::new(Unit1942_2E::Tank, 40),
+            Quant::new(Unit1942_2E::Fighter, 40),
+            Quant::new(Unit1942_2E::Bomber, 40),
+            Quant::new(Unit1942_2E::AntiAir, 40),
         ]
         .into(),
     );
@@ -33,6 +34,7 @@ fn main() {
     let mut stats = Statistics::new(&attackers, &defenders);
     let mut round_manager =
         RoundManager::new(combat_manager, sequence.clone(), attackers, defenders);
+    round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
 
     let start = std::time::SystemTime::now();
     while !round_manager.is_complete() {
