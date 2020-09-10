@@ -1,7 +1,7 @@
 use crate::Probability;
-use core::hash::Hash;
+use core::{hash::Hash, ops::Mul};
+use fnv::FnvBuildHasher;
 use std::collections::HashMap;
-use std::ops::Mul;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Prob<T> {
@@ -65,19 +65,19 @@ impl<T> Default for ProbDist<T> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProbDistBuilder<T: Eq + Hash> {
-    outcomes: HashMap<T, Probability>,
+    outcomes: HashMap<T, Probability, FnvBuildHasher>,
 }
 
 impl<T: Eq + Hash> ProbDistBuilder<T> {
     pub fn new() -> Self {
         Self {
-            outcomes: HashMap::<T, Probability>::new(),
+            outcomes: HashMap::default(),
         }
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
-            outcomes: HashMap::<T, Probability>::with_capacity(capacity),
+            outcomes: HashMap::with_capacity_and_hasher(capacity, Default::default()),
         }
     }
 
@@ -124,7 +124,7 @@ impl<T: Eq + Hash> ProbDistBuilder<T> {
 
 impl<T: Eq + Hash> From<ProbDist<T>> for ProbDistBuilder<T> {
     fn from(dist: ProbDist<T>) -> Self {
-        let mut outcomes = HashMap::with_capacity(dist.len());
+        let mut outcomes = HashMap::with_capacity_and_hasher(dist.len(), Default::default());
         for outcome in dist.outcomes.into_iter() {
             outcomes.insert(outcome.item, outcome.p);
         }

@@ -126,7 +126,12 @@ mod tests {
         let (mut stats, mut round_manager) = setup(attackers, defenders);
         run_to_completion(&mut round_manager, &mut stats);
 
-        assert!(approx_eq!(f64, stats.attacker_win_p().into(), stats.defender_win_p().into(), ulps = 1));
+        assert!(approx_eq!(
+            f64,
+            stats.attacker_win_p().into(),
+            stats.defender_win_p().into(),
+            ulps = 1
+        ));
         assert!(approx_eq!(f64, stats.total_p().into(), 1.0, ulps = 1));
 
         let attackers = Force::new(
