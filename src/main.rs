@@ -65,11 +65,11 @@ fn main() {
     }
 
     println!(
-        "{} rounds and {} outcomes analyzed, {} ({:>5.2}%) outcomes discarded",
+        "{} rounds and {} outcomes analyzed, {} ({:.2}%) outcomes discarded",
         round_manager.round_index(),
         stats.total_count(),
         round_manager.pruned_count(),
-        round_manager.pruned_p()
+        round_manager.pruned_p() * 100.0
     );
     println!("Winner      Prob.");
     println!("Attack:    {:>5.2}%", stats.attacker_win_p() * 100.0);
