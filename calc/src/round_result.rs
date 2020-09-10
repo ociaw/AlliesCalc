@@ -79,16 +79,6 @@ pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit> {
-    pub fn new() -> RoundResultBuilder<TCombatType, TUnit> {
-        RoundResultBuilder {
-            pending: ProbDistBuilder::default(),
-            completed: ProbDistBuilder::default(),
-            pruned: ProbDistBuilder::default(),
-            surviving_attackers: ProbDistBuilder::default(),
-            surviving_defenders: ProbDistBuilder::default(),
-        }
-    }
-
     pub fn build(self) -> RoundResult<TCombatType, TUnit> {
         let pending = self.pending.build();
         let completed = self.completed.build();
@@ -147,6 +137,18 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
                 defender.item.clone(),
                 defender.p * combat_result.probability,
             );
+        }
+    }
+}
+
+impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResultBuilder<TCombatType, TUnit> {
+    fn default() -> Self {
+        RoundResultBuilder {
+            pending: ProbDistBuilder::default(),
+            completed: ProbDistBuilder::default(),
+            pruned: ProbDistBuilder::default(),
+            surviving_attackers: ProbDistBuilder::default(),
+            surviving_defenders: ProbDistBuilder::default(),
         }
     }
 }

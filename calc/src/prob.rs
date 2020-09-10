@@ -94,6 +94,10 @@ impl<T: Eq + Hash> ProbDistBuilder<T> {
     pub fn len(&self) -> usize {
         self.outcomes.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.outcomes.is_empty()
+    }
 }
 
 impl<T: Eq + Hash> Default for ProbDistBuilder<T> {

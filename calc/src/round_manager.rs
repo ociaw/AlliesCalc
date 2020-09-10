@@ -48,7 +48,7 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
         let next_combat_type = self.sequence.combat_at(self.round_index + 1);
-        let mut result = RoundResultBuilder::new();
+        let mut result = RoundResultBuilder::default();
         for combat in self.last_round.pending.outcomes() {
             let combat_result = self.combat_manager.resolve(combat, next_combat_type);
             result.add(combat_result, &mut self.pruner);
