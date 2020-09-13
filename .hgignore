@@ -1,1 +1,7 @@
 ^target/
+
+/node_modules/
+/dist/
+/pkg/
+/target/
+/tmp/

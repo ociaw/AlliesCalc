@@ -13,8 +13,10 @@ aa1942_2e = { path = "aa1942_2e", version = "0.1.0" }
 [workspace]
 members = [
     "calc",
-    "aa1942_2e"
+    "aa1942_2e",
+    "wasm",
 ]
 
 [profile.release]
 debug = true
+opt-level = "s"
