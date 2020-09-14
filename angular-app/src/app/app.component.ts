@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { CalcService } from './calc.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators'
 
 @Component({
   selector: 'app-root',
@@ -8,10 +10,25 @@ import { CalcService } from './calc.service';
 })
 export class AppComponent {
   title = 'angular-app';
-  roundIndex = 0;
-  attackerWinP = 0.0;
-  defenderWinP = 0.0;
-  drawP = 0.0;
+  roundNumber: Observable<number>;
+  attackerWinP: Observable<number>;
+  defenderWinP: Observable<number>;
+  drawP: Observable<number>;
 
-  constructor(private calc: CalcService) {}
+  constructor(private calc: CalcService) {
+    this.roundNumber = calc.roundCount();
+    this.attackerWinP = calc.stats().pipe(
+      map(s => s.attacker_win_p())
+    );
+    this.defenderWinP = calc.stats().pipe(
+      map(s => s.defender_win_p())
+    );
+    this.drawP = calc.stats().pipe(
+      map(s => s.draw_p())
+    );
+  }
+
+  nextRound(event?: Event) {
+    this.calc.advanceRound();
+  }
 }

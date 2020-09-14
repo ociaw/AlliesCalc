@@ -1,6 +1,8 @@
 <h1>Axis and Allies Calculator</h1>
 <h2>1942 2nd Edition</h2>
 
+<div>Round {{ roundNumber | async }}</div>
+<div><button on-click="nextRound()">Next Round</button></div>
 <table>
   <thead>
     <th></th>
@@ -9,17 +11,17 @@
   <tbody>
     <tr>
       <th>Attacker</th>
-      <td>{{ attackerWinP }}</td>
+      <td>{{ attackerWinP | async }}</td>
     </tr>
     <tr>
       <th>Defender</th>
-      <td>{{ defenderWinP }}</td>
+      <td>{{ defenderWinP | async }}</td>
     </tr>
     <tr>
       <th>Draw</th>
-      <td>{{ drawP }}</td>
+      <td>{{ drawP | async }}</td>
     </tr>
   </tbody>
-</table>>
+</table>
 
 <router-outlet></router-outlet>

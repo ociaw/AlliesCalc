@@ -11,7 +11,7 @@
   },
   "private": true,
   "dependencies": {
-    "allies-calc-rs-wasm": "file:../wasm/pkg",
+    "allies-calc-rs": "file:../wasm/pkg",
     "@angular/animations": "~10.1.1",
     "@angular/common": "~10.1.1",
     "@angular/compiler": "~10.1.1",
@@ -28,9 +28,9 @@
     "@angular-devkit/build-angular": "~0.1001.1",
     "@angular/cli": "~10.1.1",
     "@angular/compiler-cli": "~10.1.1",
-    "@types/node": "^12.11.1",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
@@ -42,6 +42,7 @@
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~4.0.2"
+    "typescript": "~4.0.2",
+    "webpack": "4.44.1"
   }
 }
