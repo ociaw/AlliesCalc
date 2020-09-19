@@ -24,6 +24,7 @@ name = "allies-calc-rs"
 version = "0.1.0"
 dependencies = [
  "aa1942_2e",
+ "allies-calc-rs-wasm",
  "calc",
 ]
 

@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+app-root {
+    display: block;
+    max-width: 64rem;
+    margin: 0 auto;
+}

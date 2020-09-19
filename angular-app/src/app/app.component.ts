@@ -1,34 +1,45 @@
-import { Component } from '@angular/core';
-import { CalcService } from './calc.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators'
+import { CumulativeStats, RoundStats } from 'allies-calc-rs';
+import { CalcService } from './calc.service';
+import { Unit } from './model/unit';
+import { SetupForceComponent } from './setup-force/setup-force.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'angular-app';
-  roundNumber: Observable<number>;
-  attackerWinP: Observable<number>;
-  defenderWinP: Observable<number>;
-  drawP: Observable<number>;
+  attackerTitle = "Attacker";
+  defenderTitle = "Defender";
+  roundStats: Observable<RoundStats>;
+  cumulativeStats: Observable<CumulativeStats>;
+  availableUnits: Unit[] = [];
+
+  @ViewChild("attackerSetup") attackers!: SetupForceComponent;
+  @ViewChild("defenderSetup") defenders!: SetupForceComponent;
 
   constructor(private calc: CalcService) {
-    this.roundNumber = calc.roundCount();
-    this.attackerWinP = calc.stats().pipe(
-      map(s => s.attacker_win_p())
-    );
-    this.defenderWinP = calc.stats().pipe(
-      map(s => s.defender_win_p())
-    );
-    this.drawP = calc.stats().pipe(
-      map(s => s.draw_p())
-    );
+    this.roundStats = calc.roundStats();
+    this.cumulativeStats = calc.cumulativeStats();
+    calc.availableUnits().subscribe({
+      next: array => this.availableUnits = array
+    });
   }
 
-  nextRound(event?: Event) {
+  nextRound(_event?: Event) {
     this.calc.advanceRound();
+  }
+
+  setup(_event?: Event) {
+    this.calc.reset(this.attackers.selectedUnits, this.defenders.selectedUnits);
+  }
+
+  ngOnInit(): void {
+    import("allies-calc-rs").then((wasm) => {
+      wasm.setPanicHook();
+    });
   }
 }

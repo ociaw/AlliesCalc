@@ -30,6 +30,13 @@ pub fn get_combat_manager() -> CombatManager<CombatType, Unit, Hit, RollSelector
     )
 }
 
+pub fn create_round_manager(attackers: Force<Unit>, defenders: Force<Unit>) -> RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector> {
+    let sequence = CombatType::create_sequence(&attackers, &defenders);
+    let combat_manager = get_combat_manager();
+
+    RoundManager::new(combat_manager, sequence.clone(), attackers, defenders)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

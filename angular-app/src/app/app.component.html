@@ -1,27 +1,56 @@
 <h1>Axis and Allies Calculator</h1>
 <h2>1942 2nd Edition</h2>
 
-<div>Round {{ roundNumber | async }}</div>
-<div><button on-click="nextRound()">Next Round</button></div>
-<table>
-  <thead>
-    <th></th>
-    <th>Prob.</th>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Attacker</th>
-      <td>{{ attackerWinP | async }}</td>
-    </tr>
-    <tr>
-      <th>Defender</th>
-      <td>{{ defenderWinP | async }}</td>
-    </tr>
-    <tr>
-      <th>Draw</th>
-      <td>{{ drawP | async }}</td>
-    </tr>
-  </tbody>
-</table>
+<section id=setup>
+  <h3>Setup</h3>
+  <app-setup-force #attackerSetup [title]="attackerTitle" [units]="availableUnits"></app-setup-force>
+  <app-setup-force #defenderSetup [title]="defenderTitle" [units]="availableUnits"></app-setup-force>
+  <div class="actions">
+    <button (click)="setup()">Apply</button>
+  </div>
+</section>
+<section>
+  <h3>Round {{ (roundStats | async)?.roundCount }} - {{ (roundStats | async)?.combatType }}</h3>
+  <div>{{ (roundStats | async )?.pendingCount }} pending outcomes, {{ (roundStats | async )?.completedCount }} completed outcomes, {{ (roundStats | async )?.prunedCount }} pruned ({{ (roundStats | async )?.prunedP | percent:'1.2-2' }})</div>
+  <div>Reached in {{ (roundStats | async )?.probability | percent:'1.2-2' }} of battles</div>
+  <div><button on-click="nextRound()">Next Round</button></div>
+</section>
+<section>
+  <h3>Cumulative Results</h3>
+  <table>
+    <thead>
+      <th></th>
+      <th class=numeric title="Win Probability">Win Prob.</th>
+      <th class=numeric title="Mean IPC Lost">IPC Lost μ</th>
+      <th class=numeric title="IPC Standard Deviation">IPC σ</th>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Attacker</th>
+        <td class=numeric>{{ (cumulativeStats | async)?.attackerWinP | percent:'1.2-2' }}</td>
+        <td class=numeric>{{ (cumulativeStats | async)?.attackerIpcLost | number:'1.2-2' }}</td>
+        <td class=numeric>{{ (cumulativeStats | async)?.attackerIpcStdDev | number:'1.2-2' }}</td>
+      </tr>
+      <tr>
+        <th>Defender</th>
+        <td class=numeric>{{ (cumulativeStats | async)?.defenderWinP | percent:'1.2-2' }}</td>
+        <td class=numeric>{{ (cumulativeStats | async)?.defenderIpcLost | number:'1.2-2' }}</td>
+        <td class=numeric>{{ (cumulativeStats | async)?.defenderIpcStdDev | number:'1.2-2' }}</td>
+      </tr>
+      <tr>
+        <th>Draw</th>
+        <td class=numeric>{{ (cumulativeStats | async)?.drawP | percent:'1.2-2' }}</td>
+        <td class=numeric></td>
+        <td class=numeric></td>
+      </tr>
+      <tr>
+        <th>Pruned</th>
+        <td class=numeric>{{ (cumulativeStats | async)?.prunedP | percent:'1.2-2' }}</td>
+        <td class=numeric></td>
+        <td class=numeric></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
 
 <router-outlet></router-outlet>

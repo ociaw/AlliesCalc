@@ -29,11 +29,8 @@ fn main() {
     );
 
     let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
-    let combat_manager = aa1942_2e::get_combat_manager();
-
     let mut stats = Statistics::new(&attackers, &defenders);
-    let mut round_manager =
-        RoundManager::new(combat_manager, sequence.clone(), attackers, defenders);
+    let mut round_manager = aa1942_2e::create_round_manager(attackers, defenders);
     round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
 
     let start = std::time::SystemTime::now();

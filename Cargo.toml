@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 calc = { path = "calc", version = "0.1.0" }
 aa1942_2e = { path = "aa1942_2e", version = "0.1.0" }
+allies-calc-rs-wasm = { path = "wasm" }
 
 [workspace]
 members = [
