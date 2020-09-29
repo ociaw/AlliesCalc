@@ -160,7 +160,11 @@ mod tests {
             summary.defender.win_p,
             1
         ));
-        assert!(assert_prob_eq(summary.total_p, Probability::one(), 1));
+        assert!(
+            assert_prob_eq(summary.total_p, Probability::one(), 2),
+            "actual: {}",
+            summary.total_p
+        );
 
         let attackers = Force::new(
             vec![

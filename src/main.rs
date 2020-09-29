@@ -66,8 +66,7 @@ fn main() {
 
     match start.elapsed() {
         Ok(elapsed) => {
-            // it prints '2'
-            println!("Took {} seconds", elapsed.as_millis() as f64 / 2000.0);
+            println!("Took {} seconds", elapsed.as_millis() as f64 / 1000.0);
         }
         Err(e) => {
             // an error occurred!

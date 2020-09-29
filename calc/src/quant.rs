@@ -1,3 +1,5 @@
+use core::hash::Hash;
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct Quant<T> {
     pub item: T,
@@ -14,12 +16,13 @@ impl<T> Quant<T> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct QuantDist<T> {
     outcomes: Vec<Quant<T>>,
+    hash: u64,
 }
 
-impl<T> QuantDist<T> {
+impl<T: Eq + Hash> QuantDist<T> {
     pub fn outcomes(&self) -> &[Quant<T>] {
         &self.outcomes
     }
@@ -31,27 +34,7 @@ impl<T> QuantDist<T> {
     pub fn is_empty(&self) -> bool {
         self.outcomes.is_empty()
     }
-}
 
-impl<T: Eq> From<Vec<Quant<T>>> for QuantDist<T> {
-    fn from(outcomes: Vec<Quant<T>>) -> Self {
-        let mut builder = QuantDistBuilder::with_capacity(outcomes.len());
-        for outcome in outcomes.into_iter() {
-            builder.add_quant(outcome);
-        }
-        builder.build()
-    }
-}
-
-impl<T> Default for QuantDist<T> {
-    fn default() -> Self {
-        Self {
-            outcomes: Vec::<Quant<T>>::new(),
-        }
-    }
-}
-
-impl<T: Eq> QuantDist<T> {
     pub fn count(&self, item: &T) -> u32 {
         match self.find_index(item) {
             Some(index) => self.outcomes[index].count,
@@ -64,12 +47,34 @@ impl<T: Eq> QuantDist<T> {
     }
 }
 
+impl<T: Eq + Hash> From<Vec<Quant<T>>> for QuantDist<T> {
+    fn from(outcomes: Vec<Quant<T>>) -> Self {
+        let mut builder = QuantDistBuilder::with_capacity(outcomes.len());
+        for outcome in outcomes.into_iter() {
+            builder.add_quant(outcome);
+        }
+        builder.build()
+    }
+}
+
+impl<T: Eq + Hash> Default for QuantDist<T> {
+    fn default() -> Self {
+        QuantDistBuilder::new().build()
+    }
+}
+
+impl<T: Eq + Hash> Hash for QuantDist<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.hash);
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct QuantDistBuilder<T: Eq> {
+pub struct QuantDistBuilder<T: Eq + Hash> {
     outcomes: Vec<Quant<T>>,
 }
 
-impl<T: Eq> QuantDistBuilder<T> {
+impl<T: Eq + Hash> QuantDistBuilder<T> {
     pub fn new() -> Self {
         Self {
             outcomes: Vec::<Quant<T>>::new(),
@@ -83,13 +88,18 @@ impl<T: Eq> QuantDistBuilder<T> {
     }
 
     pub fn build(self) -> QuantDist<T> {
+        use core::hash::Hasher;
+        let mut hasher = fnv::FnvHasher::default();
+        self.outcomes.hash(&mut hasher);
+        let hash = hasher.finish();
         QuantDist {
             outcomes: self.outcomes,
+            hash,
         }
     }
 }
 
-impl<T: Eq> Default for QuantDistBuilder<T> {
+impl<T: Eq + Hash> Default for QuantDistBuilder<T> {
     fn default() -> Self {
         Self {
             outcomes: Vec::<Quant<T>>::new(),
@@ -97,7 +107,7 @@ impl<T: Eq> Default for QuantDistBuilder<T> {
     }
 }
 
-impl<T: Eq> QuantDistBuilder<T> {
+impl<T: Eq + Hash> QuantDistBuilder<T> {
     pub fn add(&mut self, item: T, count: u32) {
         self.add_quant(Quant::new(item, count));
     }
@@ -155,7 +165,7 @@ impl<T: Eq> QuantDistBuilder<T> {
     }
 }
 
-impl<T: Eq> From<QuantDist<T>> for QuantDistBuilder<T> {
+impl<T: Eq + Hash> From<QuantDist<T>> for QuantDistBuilder<T> {
     fn from(dist: QuantDist<T>) -> Self {
         QuantDistBuilder {
             outcomes: dist.outcomes,
