@@ -1,5 +1,5 @@
-use crate::*;
 use super::*;
+use crate::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Summarizer<TCombatType: CombatType, TUnit: Unit> {
@@ -58,32 +58,27 @@ impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
         self.pruned_p += round.pruned_p;
     }
 
-    fn accumulate_completed(
-        &mut self,
-        combat: &ProbDist<Combat<TCombatType, TUnit>>,
-    ) {
+    fn accumulate_completed(&mut self, combat: &ProbDist<Combat<TCombatType, TUnit>>) {
         for combat in combat.outcomes() {
             self.completed_combats.add_prob(combat.clone());
             self.accumulate_combat(combat);
         }
     }
 
-    fn accumulate_combat(
-        &mut self,
-        combat: &Prob<Combat<TCombatType, TUnit>>,
-    ) {
+    fn accumulate_combat(&mut self, combat: &Prob<Combat<TCombatType, TUnit>>) {
         let p = combat.p;
         let combat = &combat.item;
         self.total_p += p;
 
-        self.attacker_summary.accumulate(combat, p, self.total_p, Side::Attacker);
-        self.defender_summary.accumulate(combat, p, self.total_p, Side::Defender);
+        self.attacker_summary
+            .accumulate(combat, p, self.total_p, Side::Attacker);
+        self.defender_summary
+            .accumulate(combat, p, self.total_p, Side::Defender);
         if combat.winner().is_none() {
             self.draw_p += p;
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 struct BattleSideBuilder {
@@ -110,16 +105,15 @@ impl BattleSideBuilder {
             Side::Defender => &combat.defenders,
         };
 
-        let (ipc_sum, unit_count_sum, strength_sum) = force.outcomes()
-        .iter()
-        .fold((0, 0, 0), |acc, quant| {
-            let count = quant.count;
-            let unit = quant.item;
-            let ipc = acc.0 + unit.ipc() * count;
-            let unit_count = acc.1 + count;
-            let strength = acc.2 + unit.strength(side) as u32 * count;
-            (ipc, unit_count, strength)
-        });
+        let (ipc_sum, unit_count_sum, strength_sum) =
+            force.outcomes().iter().fold((0, 0, 0), |acc, quant| {
+                let count = quant.count;
+                let unit = quant.item;
+                let ipc = acc.0 + unit.ipc() * count;
+                let unit_count = acc.1 + count;
+                let strength = acc.2 + unit.strength(side) as u32 * count;
+                (ipc, unit_count, strength)
+            });
 
         self.ipc.add_value(ipc_sum as f64, p, total_p);
         self.unit_count.add_value(unit_count_sum as f64, p, total_p);

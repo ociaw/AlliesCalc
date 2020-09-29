@@ -1,5 +1,5 @@
-use crate::*;
 use super::*;
+use crate::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct BattleSummary<TCombatType: CombatType, TUnit: Unit> {

@@ -96,7 +96,11 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
         }
     }
 
-    pub fn build(self, pruned_count: usize, pruned_p: Probability) -> RoundResult<TCombatType, TUnit> {
+    pub fn build(
+        self,
+        pruned_count: usize,
+        pruned_p: Probability,
+    ) -> RoundResult<TCombatType, TUnit> {
         let pending = self.pending.build();
         let completed = self.completed.build();
         let pruned = self.pruned.build();

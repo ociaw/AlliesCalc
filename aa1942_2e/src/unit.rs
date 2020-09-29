@@ -171,21 +171,25 @@ impl calc::Unit for Unit {
 
 impl core::fmt::Display for Unit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Unit::Infantry => "Infantry",
-            Unit::Artillery => "Artillery",
-            Unit::Tank => "Tank",
-            Unit::AntiAir => "Anti-Air",
-            Unit::BombardingCruiser => "Bombarding Cruiser",
-            Unit::BombardingBattleship => "Bombarding Battleship",
-            Unit::Fighter => "Fighter",
-            Unit::Bomber => "Bomber",
-            Unit::Submarine => "Submarine",
-            Unit::Destroyer => "Destroyer",
-            Unit::Cruiser => "Cruiser",
-            Unit::Carrier => "Carrier",
-            Unit::Battleship => "Battleship",
-            Unit::BattleshipDamaged => "Battleship (Damaged)",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Unit::Infantry => "Infantry",
+                Unit::Artillery => "Artillery",
+                Unit::Tank => "Tank",
+                Unit::AntiAir => "Anti-Air",
+                Unit::BombardingCruiser => "Bombarding Cruiser",
+                Unit::BombardingBattleship => "Bombarding Battleship",
+                Unit::Fighter => "Fighter",
+                Unit::Bomber => "Bomber",
+                Unit::Submarine => "Submarine",
+                Unit::Destroyer => "Destroyer",
+                Unit::Cruiser => "Cruiser",
+                Unit::Carrier => "Carrier",
+                Unit::Battleship => "Battleship",
+                Unit::BattleshipDamaged => "Battleship (Damaged)",
+            }
+        )
     }
 }

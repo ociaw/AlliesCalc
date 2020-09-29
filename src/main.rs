@@ -1,7 +1,7 @@
 use aa1942_2e::CombatType as CombatType1942_2E;
 use aa1942_2e::Unit as Unit1942_2E;
-use calc::*;
 use calc::stats::*;
+use calc::*;
 use std::convert::TryInto;
 
 fn main() {
@@ -34,11 +34,7 @@ fn main() {
     round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
     let mut summarizer = Summarizer::new(round_manager.last_round());
 
-    println!(
-        "Round {} - {}",
-        0,
-        sequence.combat_at(0)
-    );
+    println!("Round {} - {}", 0, sequence.combat_at(0));
     println!("Attacker Stats:");
     print_round_side_summary(&summarizer.prebattle().attacker);
     println!("Defender Stats:");

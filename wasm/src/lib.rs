@@ -1,8 +1,8 @@
 mod utils;
 use wasm_bindgen::prelude::*;
 
-use calc::{Force, QuantDistBuilder, Unit};
 use calc::stats::*;
+use calc::{Force, QuantDistBuilder, Unit};
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -14,71 +14,65 @@ pub fn set_panic_hook() {
 }
 
 type Unit1942_2E = aa1942_2e::Unit;
-type RoundManagerAA1942_2E = calc::RoundManager<aa1942_2e::CombatType, Unit1942_2E, aa1942_2e::Hit, aa1942_2e::RollSelector, aa1942_2e::SurvivorSelector>;
+type RoundManagerAA1942_2E = calc::RoundManager<
+    aa1942_2e::CombatType,
+    Unit1942_2E,
+    aa1942_2e::Hit,
+    aa1942_2e::RollSelector,
+    aa1942_2e::SurvivorSelector,
+>;
 type CombatSequenceAA1942_2E = calc::CombatSequence<aa1942_2e::CombatType>;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Ruleset {
-    AA1942_2E
+    AA1942_2E,
 }
 
 #[wasm_bindgen]
 pub struct UnitProvider {
-    ruleset: Ruleset
+    ruleset: Ruleset,
 }
 
 #[wasm_bindgen]
 impl UnitProvider {
     #[wasm_bindgen(constructor)]
     pub fn new(ruleset: Ruleset) -> Self {
-        UnitProvider {
-            ruleset
-        }
+        UnitProvider { ruleset }
     }
 
     #[wasm_bindgen(js_name = getUnitCount)]
     pub fn get_unit_count(&self) -> u32 {
         match self.ruleset {
-            Ruleset::AA1942_2E => {
-                Unit1942_2E::all().len() as u32
-            }
+            Ruleset::AA1942_2E => Unit1942_2E::all().len() as u32,
         }
     }
 
     #[wasm_bindgen(js_name = getUnitName)]
     pub fn get_unit_name(&self, index: u32) -> String {
         match self.ruleset {
-            Ruleset::AA1942_2E => {
-                format!("{}", Unit1942_2E::all()[index as usize])
-            }
+            Ruleset::AA1942_2E => format!("{}", Unit1942_2E::all()[index as usize]),
         }
     }
 
     #[wasm_bindgen(js_name = getUnitIpc)]
     pub fn get_unit_ipc(&self, index: u32) -> u32 {
         match self.ruleset {
-            Ruleset::AA1942_2E => {
-                Unit1942_2E::all()[index as usize].ipc()
-            }
+            Ruleset::AA1942_2E => Unit1942_2E::all()[index as usize].ipc(),
         }
     }
 
     #[wasm_bindgen(js_name = getUnitAttack)]
     pub fn get_unit_attack(&self, index: u32) -> u8 {
         match self.ruleset {
-            Ruleset::AA1942_2E => {
-                Unit1942_2E::all()[index as usize].attack()
-            }
+            Ruleset::AA1942_2E => Unit1942_2E::all()[index as usize].attack(),
         }
     }
 
     #[wasm_bindgen(js_name = getUnitDefense)]
     pub fn get_unit_defense(&self, index: u32) -> u8 {
         match self.ruleset {
-            Ruleset::AA1942_2E => {
-                Unit1942_2E::all()[index as usize].defense()
-            }
+            Ruleset::AA1942_2E => Unit1942_2E::all()[index as usize].defense(),
         }
     }
 }
@@ -105,7 +99,8 @@ impl BattleBuilder {
     pub fn add_attacker(&mut self, unit_index: u32, count: u32) {
         match self.ruleset {
             Ruleset::AA1942_2E => {
-                self.attackers.add(Unit1942_2E::all()[unit_index as usize], count);
+                self.attackers
+                    .add(Unit1942_2E::all()[unit_index as usize], count);
             }
         }
     }
@@ -114,14 +109,18 @@ impl BattleBuilder {
     pub fn add_defender(&mut self, unit_index: u32, count: u32) {
         match self.ruleset {
             Ruleset::AA1942_2E => {
-                self.defenders.add(Unit1942_2E::all()[unit_index as usize], count);
+                self.defenders
+                    .add(Unit1942_2E::all()[unit_index as usize], count);
             }
         }
     }
 
     pub fn build(self) -> Battle {
         use std::rc::Rc;
-        Battle::new(Rc::new(self.attackers.build()), Rc::new(self.defenders.build()))
+        Battle::new(
+            Rc::new(self.attackers.build()),
+            Rc::new(self.defenders.build()),
+        )
     }
 }
 
@@ -161,7 +160,10 @@ impl Battle {
 
     #[wasm_bindgen(js_name = roundCombatType)]
     pub fn round_combat_type(&self) -> String {
-        format!("{}", self.sequence.combat_at(self.round_manager.round_index()))
+        format!(
+            "{}",
+            self.sequence.combat_at(self.round_manager.round_index())
+        )
     }
 
     #[wasm_bindgen(js_name = roundStats)]
@@ -177,7 +179,7 @@ impl Battle {
             pending_count: round.pending.len() as u32,
             completed_count: round.completed.len() as u32,
             pruned_count: round.pruned_count as u32,
-            pruned_p: round.pruned_p.into()
+            pruned_p: round.pruned_p.into(),
         }
     }
 
@@ -192,7 +194,7 @@ impl Battle {
             defender_ipc_lost: summary.defender.ipc_lost.mean,
             attacker_ipc_stddev: summary.attacker.ipc.std_dev(),
             defender_ipc_stddev: summary.defender.ipc.std_dev(),
-            pruned_p: self.total_pruned_p
+            pruned_p: self.total_pruned_p,
         }
     }
 
@@ -246,7 +248,7 @@ pub struct RoundStats {
     pending_count: u32,
     completed_count: u32,
     pruned_count: u32,
-    pruned_p: f64
+    pruned_p: f64,
 }
 
 #[wasm_bindgen]

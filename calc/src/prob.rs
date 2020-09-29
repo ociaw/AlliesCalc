@@ -100,7 +100,6 @@ impl<T: Eq + Hash> ProbDistBuilder<T> {
     }
 }
 
-
 impl<T: Clone + Eq + Hash> ProbDistBuilder<T> {
     pub fn build_cloned(&self) -> ProbDist<T> {
         ProbDist {
@@ -112,7 +111,6 @@ impl<T: Clone + Eq + Hash> ProbDistBuilder<T> {
         }
     }
 }
-
 
 impl<T: Eq + Hash> Default for ProbDistBuilder<T> {
     fn default() -> Self {

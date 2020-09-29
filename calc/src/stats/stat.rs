@@ -1,4 +1,7 @@
-use std::{fmt::Display, ops::{Add, AddAssign, Div, DivAssign, Sub, SubAssign}};
+use std::{
+    fmt::Display,
+    ops::{Add, AddAssign, Div, DivAssign, Sub, SubAssign},
+};
 
 use crate::*;
 

@@ -4,12 +4,12 @@ mod roll_selector;
 mod survivor_selector;
 mod unit;
 
+pub use crate::stats::*;
 pub use combattype::CombatType;
 pub use hit::Hit;
 pub use roll_selector::RollSelector;
 pub use survivor_selector::SurvivorSelector;
 pub use unit::Unit;
-pub use crate::stats::*;
 
 use calc::*;
 pub fn get_combat_manager() -> CombatManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>
@@ -31,7 +31,10 @@ pub fn get_combat_manager() -> CombatManager<CombatType, Unit, Hit, RollSelector
     )
 }
 
-pub fn create_round_manager(attackers: Force<Unit>, defenders: Force<Unit>) -> RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector> {
+pub fn create_round_manager(
+    attackers: Force<Unit>,
+    defenders: Force<Unit>,
+) -> RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector> {
     let sequence = CombatType::create_sequence(&attackers, &defenders);
     let combat_manager = get_combat_manager();
 
@@ -85,8 +88,18 @@ mod tests {
         run_to_completion(&mut round_manager, &mut summarizer);
         let summary = summarizer.summarize();
 
-        assert!(approx_eq!(f64, summary.attacker.ipc_lost.mean, 3.0, ulps = 6));
-        assert!(approx_eq!(f64, summary.defender.ipc_lost.mean, 6.0, ulps = 6));
+        assert!(approx_eq!(
+            f64,
+            summary.attacker.ipc_lost.mean,
+            3.0,
+            ulps = 6
+        ));
+        assert!(approx_eq!(
+            f64,
+            summary.defender.ipc_lost.mean,
+            6.0,
+            ulps = 6
+        ));
 
         assert!(assert_prob_eq(
             summary.attacker.win_p,
@@ -237,7 +250,11 @@ mod tests {
             1
         ));
         assert_eq!(summary.draw_p, Probability::zero());
-        assert!(assert_prob_eq(last_round.total_probability(), Probability::zero(), 1));
+        assert!(assert_prob_eq(
+            last_round.total_probability(),
+            Probability::zero(),
+            1
+        ));
         assert!(!round_manager.last_round().stalemate);
 
         let attackers = Force::new(vec![Quant::new(Unit::Fighter, 2)].into());

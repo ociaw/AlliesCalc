@@ -1,6 +1,6 @@
-use std::ops::Sub;
-use crate::*;
 use super::*;
+use crate::*;
+use std::ops::Sub;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSummary {
@@ -43,7 +43,7 @@ impl<TCombatType: CombatType, TUnit: Unit> From<&RoundResult<TCombatType, TUnit>
             attacker: RoundSideSummary::from_round_result(result, Side::Attacker),
             defender: RoundSideSummary::from_round_result(result, Side::Defender),
             draw_p: sum_win_p(result.completed.outcomes(), None),
-            pruned_p: result.pruned_p
+            pruned_p: result.pruned_p,
         }
     }
 }
@@ -53,7 +53,7 @@ pub struct RoundSideDelta {
     pub ipc: Stat,
     pub unit_count: Stat,
     pub strength: Stat,
-    pub win_p: Probability
+    pub win_p: Probability,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -65,8 +65,10 @@ pub struct RoundSideSummary {
 }
 
 impl RoundSideSummary {
-    pub fn from_round_result<TCombatType: CombatType, TUnit: Unit>(result: &RoundResult<TCombatType, TUnit>, side: Side) -> Self
-    {
+    pub fn from_round_result<TCombatType: CombatType, TUnit: Unit>(
+        result: &RoundResult<TCombatType, TUnit>,
+        side: Side,
+    ) -> Self {
         let iter = match side {
             Side::Attacker => result.surviving_attackers.outcomes(),
             Side::Defender => result.surviving_defenders.outcomes(),
@@ -82,9 +84,8 @@ impl RoundSideSummary {
 
         for prob in iter {
             let force = &prob.item;
-            let (ipc_sum, unit_count_sum, strength_sum) = force.outcomes()
-                .iter()
-                .fold((0, 0, 0), |acc, quant| {
+            let (ipc_sum, unit_count_sum, strength_sum) =
+                force.outcomes().iter().fold((0, 0, 0), |acc, quant| {
                     let count = quant.count;
                     let unit = quant.item;
                     let ipc = acc.0 + unit.ipc() * count;
@@ -121,8 +122,12 @@ impl Sub for RoundSideSummary {
     }
 }
 
-fn sum_win_p<TCombatType: CombatType, TUnit: Unit>(outcomes: &[Prob<Combat<TCombatType, TUnit>>], side: Option<Side>) -> Probability {
-    outcomes.iter()
+fn sum_win_p<TCombatType: CombatType, TUnit: Unit>(
+    outcomes: &[Prob<Combat<TCombatType, TUnit>>],
+    side: Option<Side>,
+) -> Probability {
+    outcomes
+        .iter()
         .filter(|prob| prob.item.winner() == side)
         .map(|prob| prob.p)
         .sum()

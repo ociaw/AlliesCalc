@@ -22,7 +22,7 @@ impl Probability {
     pub fn from_ratio(numer: u32, denom: u32) -> Self {
         if numer > denom {
             panic!(
-                "Numerator must be less than or equal to denoinator. {} / {}",
+                "Numerator must be less than or equal to denominator. {} / {}",
                 numer, denom
             );
         }
