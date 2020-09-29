@@ -5,3 +5,7 @@
 /pkg/
 /target/
 /tmp/
+
+# Ignore VS Code files
+^.vscode/
+\.code-workspace$
