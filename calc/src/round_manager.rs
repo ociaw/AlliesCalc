@@ -48,13 +48,15 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
         let next_combat_type = self.sequence.combat_at(self.round_index + 1);
-        let mut result = RoundResultBuilder::default();
+        let mut result = RoundResultBuilder::new(self.round_index);
+        let old_pruned_count = self.pruned_count();
+        let old_pruned_p = self.pruned_p();
         for combat in self.last_round.pending.outcomes() {
             let combat_result = self.combat_manager.resolve(combat, next_combat_type);
             result.add(combat_result, &mut self.pruner);
         }
 
-        let mut result = result.build();
+        let mut result = result.build(self.pruned_count() - old_pruned_count, self.pruned_p() - old_pruned_p);
         // We check if the current probability and the last probability are *exactly* the same;
         // if so, this may mean that we're reaching a stalemate: a point where neither side can
         // hit each other. If this happens 4 times in a row, we consider ourselves to be

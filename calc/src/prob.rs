@@ -100,6 +100,20 @@ impl<T: Eq + Hash> ProbDistBuilder<T> {
     }
 }
 
+
+impl<T: Clone + Eq + Hash> ProbDistBuilder<T> {
+    pub fn build_cloned(&self) -> ProbDist<T> {
+        ProbDist {
+            outcomes: self
+                .outcomes
+                .iter()
+                .map(|t| Prob::new(t.0.clone(), *t.1))
+                .collect(),
+        }
+    }
+}
+
+
 impl<T: Eq + Hash> Default for ProbDistBuilder<T> {
     fn default() -> Self {
         Self::new()

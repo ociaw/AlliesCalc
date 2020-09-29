@@ -2,6 +2,7 @@ mod utils;
 use wasm_bindgen::prelude::*;
 
 use calc::{Force, QuantDistBuilder, Unit};
+use calc::stats::*;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -128,9 +129,8 @@ impl BattleBuilder {
 pub struct Battle {
     round_manager: RoundManagerAA1942_2E,
     sequence: CombatSequenceAA1942_2E,
-    last_pruned_count: usize,
-    last_pruned_p: f64,
-    stats: calc::Statistics
+    total_pruned_p: f64,
+    summarizer: Summarizer<aa1942_2e::CombatType, Unit1942_2E>,
 }
 
 #[wasm_bindgen]
@@ -138,15 +138,14 @@ impl Battle {
     fn new(attackers: Force<Unit1942_2E>, defenders: Force<Unit1942_2E>) -> Self {
         use core::convert::TryInto;
         let sequence = aa1942_2e::CombatType::create_sequence(&attackers, &defenders);
-        let stats = calc::Statistics::new(&attackers, &defenders);
         let mut round_manager = aa1942_2e::create_round_manager(attackers, defenders);
         round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
+        let summarizer = Summarizer::new(round_manager.last_round());
         Self {
             round_manager,
             sequence,
-            last_pruned_count: 0,
-            last_pruned_p: 0.0,
-            stats,
+            total_pruned_p: 0.0,
+            summarizer,
         }
     }
 
@@ -170,8 +169,6 @@ impl Battle {
         let round_manager = &self.round_manager;
         let round = round_manager.last_round();
         let round_count = round_manager.round_index() as u32;
-        let pruned_count = (round_manager.pruned_count() - self.last_pruned_count) as u32;
-        let pruned_p = f64::from(round_manager.pruned_p()) - self.last_pruned_p;
 
         RoundStats {
             round_count,
@@ -179,32 +176,31 @@ impl Battle {
             p: round.total_probability.into(),
             pending_count: round.pending.len() as u32,
             completed_count: round.completed.len() as u32,
-            pruned_count,
-            pruned_p
+            pruned_count: round.pruned_count as u32,
+            pruned_p: round.pruned_p.into()
         }
     }
 
     #[wasm_bindgen(js_name = cumulativeStats)]
     pub fn cumulative_stats(&self) -> CumulativeStats {
-        let stats = &self.stats;
+        let summary = self.summarizer.clone().summarize();
         CumulativeStats {
-            attacker_win_p: stats.attacker_win_p().into(),
-            defender_win_p: stats.defender_win_p().into(),
-            draw_p: stats.draw_p().into(),
-            attacker_ipc_lost: stats.attacker_ipc_lost().into(),
-            defender_ipc_lost: stats.defender_ipc_lost().into(),
-            attacker_ipc_stddev: stats.attacker_ipc_variance(),
-            defender_ipc_stddev: stats.defender_ipc_variance(),
-            pruned_p: self.last_pruned_p
+            attacker_win_p: summary.attacker.win_p.into(),
+            defender_win_p: summary.defender.win_p.into(),
+            draw_p: summary.draw_p.into(),
+            attacker_ipc_lost: summary.attacker.ipc_lost.mean,
+            defender_ipc_lost: summary.defender.ipc_lost.mean,
+            attacker_ipc_stddev: summary.attacker.ipc.std_dev(),
+            defender_ipc_stddev: summary.defender.ipc.std_dev(),
+            pruned_p: self.total_pruned_p
         }
     }
 
     pub fn advance_round(&mut self) {
         let round_manager = &mut self.round_manager;
-        self.last_pruned_count = round_manager.pruned_count();
-        self.last_pruned_p = round_manager.pruned_p().into();
+        self.total_pruned_p = round_manager.pruned_p().into();
         let round = round_manager.advance_round();
-        self.stats.add_dist(&round.completed);
+        self.summarizer.add_round(&round);
     }
 
     pub fn default() -> Self {

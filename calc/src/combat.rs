@@ -49,7 +49,7 @@ pub enum Side {
     Defender,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Combat<TCombatType, TUnit>
 where
     TCombatType: CombatType,

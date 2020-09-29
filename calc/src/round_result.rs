@@ -5,24 +5,30 @@ use crate::{
 
 #[derive(Debug)]
 pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
+    pub index: usize,
     pub pending: ProbDist<Combat<TCombatType, TUnit>>,
     pub completed: ProbDist<Combat<TCombatType, TUnit>>,
     pub pruned: ProbDist<Combat<TCombatType, TUnit>>,
     pub surviving_attackers: ProbDist<Force<TUnit>>,
     pub surviving_defenders: ProbDist<Force<TUnit>>,
     pub total_probability: Probability,
+    pub pruned_count: usize,
+    pub pruned_p: Probability,
     pub stalemate: bool,
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResult<TCombatType, TUnit> {
     fn default() -> Self {
         RoundResult {
+            index: 0,
             pending: ProbDist::default(),
             completed: ProbDist::default(),
             pruned: ProbDist::default(),
             surviving_attackers: ProbDist::default(),
             surviving_defenders: ProbDist::default(),
             total_probability: Probability::zero(),
+            pruned_count: 0,
+            pruned_p: Probability::zero(),
             stalemate: false,
         }
     }
@@ -44,8 +50,6 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
                 p: Probability::one(),
             }]
             .into(),
-            completed: ProbDist::default(),
-            pruned: ProbDist::default(),
             surviving_attackers: vec![Prob {
                 item: attackers,
                 p: Probability::one(),
@@ -57,7 +61,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
             }]
             .into(),
             total_probability: Probability::one(),
-            stalemate: false,
+            ..Default::default()
         }
     }
     pub fn is_complete(&self) -> bool {
@@ -71,6 +75,8 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
 
 #[derive(Debug)]
 pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
+    // TODO: Why are these public?
+    pub index: usize,
     pub pending: ProbDistBuilder<Combat<TCombatType, TUnit>>,
     pub completed: ProbDistBuilder<Combat<TCombatType, TUnit>>,
     pub pruned: ProbDistBuilder<Combat<TCombatType, TUnit>>,
@@ -79,7 +85,18 @@ pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit> {
-    pub fn build(self) -> RoundResult<TCombatType, TUnit> {
+    pub fn new(round_index: usize) -> Self {
+        RoundResultBuilder {
+            index: round_index,
+            pending: ProbDistBuilder::default(),
+            completed: ProbDistBuilder::default(),
+            pruned: ProbDistBuilder::default(),
+            surviving_attackers: ProbDistBuilder::default(),
+            surviving_defenders: ProbDistBuilder::default(),
+        }
+    }
+
+    pub fn build(self, pruned_count: usize, pruned_p: Probability) -> RoundResult<TCombatType, TUnit> {
         let pending = self.pending.build();
         let completed = self.completed.build();
         let pruned = self.pruned.build();
@@ -91,12 +108,15 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
             .map(|o| o.p)
             .sum();
         RoundResult {
+            index: self.index,
             pending,
             completed,
             pruned,
             surviving_attackers: self.surviving_attackers.build(),
             surviving_defenders: self.surviving_defenders.build(),
             total_probability,
+            pruned_count,
+            pruned_p,
             stalemate: false,
         }
     }
@@ -137,18 +157,6 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
                 defender.item.clone(),
                 defender.p * combat_result.probability,
             );
-        }
-    }
-}
-
-impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResultBuilder<TCombatType, TUnit> {
-    fn default() -> Self {
-        RoundResultBuilder {
-            pending: ProbDistBuilder::default(),
-            completed: ProbDistBuilder::default(),
-            pruned: ProbDistBuilder::default(),
-            surviving_attackers: ProbDistBuilder::default(),
-            surviving_defenders: ProbDistBuilder::default(),
         }
     }
 }

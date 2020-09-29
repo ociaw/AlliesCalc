@@ -1,3 +1,5 @@
+use crate::Side;
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum Unit {
     Infantry,
@@ -118,6 +120,13 @@ impl calc::Unit for Unit {
             Unit::Carrier => 14,
             Unit::Battleship => 20,
             Unit::BattleshipDamaged => 20,
+        }
+    }
+
+    fn strength(self, side: Side) -> u8 {
+        match side {
+            Side::Attacker => self.attack(),
+            Side::Defender => self.defense(),
         }
     }
 

@@ -1,5 +1,7 @@
 #![feature(or_insert_with_key)]
 
+pub mod stats;
+
 mod combat;
 mod combat_manager;
 mod hit;
@@ -11,7 +13,6 @@ mod roll;
 mod roller;
 mod round_manager;
 mod round_result;
-mod statistics;
 mod survivor_selector;
 mod unit;
 
@@ -26,7 +27,6 @@ pub use roll::{Roll, RollSelector};
 pub use roller::Roller;
 pub use round_manager::RoundManager;
 pub use round_result::{RoundResult, RoundResultBuilder};
-pub use statistics::Statistics;
 pub use survivor_selector::SurvivorSelector;
 pub use unit::{Force, Unit};
 

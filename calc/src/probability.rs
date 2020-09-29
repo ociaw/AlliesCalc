@@ -1,7 +1,7 @@
 use core::convert::TryFrom;
 use core::fmt::Display;
 use core::iter::{Iterator, Sum};
-use core::ops::{Add, AddAssign, Mul, MulAssign};
+use core::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Probability {
@@ -86,6 +86,29 @@ impl Add<Probability> for Probability {
 impl AddAssign for Probability {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
+    }
+}
+
+impl Sub<Probability> for Probability {
+    type Output = Self;
+
+    fn sub(self, rhs: Probability) -> Self::Output {
+        let value = self.value - rhs.value;
+        if value < 0.0 - TOLERANCE {
+            panic!(
+                "Sub results in a probability less than 0: {} - {}",
+                self.value, rhs.value
+            );
+        }
+        Self {
+            value: if value < 0.0 { 0.0 } else { value },
+        }
+    }
+}
+
+impl SubAssign for Probability {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
     }
 }
 
