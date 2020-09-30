@@ -1,7 +1,6 @@
 use crate::*;
 use statrs::distribution::{Binomial, Discrete};
-use std::collections::hash_map::Iter;
-use std::collections::HashMap;
+use std::collections::hash_map::*;
 
 /// Computes and caches rolls given a distribution of rolls.
 pub struct Roller<TUnit: Unit, THit: Hit<TUnit>> {
@@ -14,7 +13,15 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
         &mut self,
         strike: QuantDist<Roll<TUnit, THit>>,
     ) -> &ProbDist<QuantDist<THit>> {
-        self.cache.entry(strike).or_insert_with_key(roll_hits)
+        match self.cache.entry(strike) {
+            Entry::Vacant(vacant) => {
+                let value = roll_hits(vacant.key());
+                vacant.insert(value)
+            }
+            Entry::Occupied(occupied) => {
+                occupied.into_mut()
+            }
+        }
     }
 }
 
@@ -52,10 +59,10 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
 
         let entry = hit_dists.entry(hit);
         match entry {
-            std::collections::hash_map::Entry::Occupied(mut existing) => {
+            Entry::Occupied(mut existing) => {
                 existing.insert(combine_dists(existing.get(), &dist));
             }
-            std::collections::hash_map::Entry::Vacant(vacant) => {
+            Entry::Vacant(vacant) => {
                 vacant.insert(dist);
             }
         }

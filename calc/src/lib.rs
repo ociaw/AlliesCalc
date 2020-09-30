@@ -1,5 +1,3 @@
-#![feature(or_insert_with_key)]
-
 pub mod stats;
 
 mod combat;
