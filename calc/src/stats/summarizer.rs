@@ -3,20 +3,20 @@ use crate::*;
 
 /// Summarizes a battle.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Summarizer<TCombatType: CombatType, TUnit: Unit> {
+pub struct Summarizer<TBattlePhase: BattlePhase, TUnit: Unit> {
     prebattle: RoundSummary,
     round_summaries: Vec<RoundSummary>,
     attacker_summary: BattleSideBuilder,
     defender_summary: BattleSideBuilder,
-    completed_combats: ProbDistBuilder<Combat<TCombatType, TUnit>>,
+    completed_combats: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
     draw_p: Probability,
     total_p: Probability,
     pruned_p: Probability,
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> Summarizer<TBattlePhase, TUnit> {
     /// Creates a new battle summary.
-    pub fn new(prebattle: &RoundResult<TCombatType, TUnit>) -> Self {
+    pub fn new(prebattle: &RoundResult<TBattlePhase, TUnit>) -> Self {
         Self {
             prebattle: prebattle.into(),
             round_summaries: Vec::new(),
@@ -45,7 +45,7 @@ impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
     }
 
     /// Consumes this summarizer and constructs a new `BattleSummary`.
-    pub fn summarize(self) -> BattleSummary<TCombatType, TUnit> {
+    pub fn summarize(self) -> BattleSummary<TBattlePhase, TUnit> {
         BattleSummary {
             prebattle: self.prebattle,
             round_summaries: self.round_summaries,
@@ -58,20 +58,20 @@ impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
         }
     }
 
-    pub fn add_round(&mut self, round: &RoundResult<TCombatType, TUnit>) {
+    pub fn add_round(&mut self, round: &RoundResult<TBattlePhase, TUnit>) {
         self.round_summaries.push(round.into());
         self.accumulate_completed(&round.completed);
         self.pruned_p += round.pruned_p;
     }
 
-    fn accumulate_completed(&mut self, combat: &ProbDist<Combat<TCombatType, TUnit>>) {
+    fn accumulate_completed(&mut self, combat: &ProbDist<Combat<TBattlePhase, TUnit>>) {
         for combat in combat.outcomes() {
             self.completed_combats.add_prob(combat.clone());
             self.accumulate_combat(combat);
         }
     }
 
-    fn accumulate_combat(&mut self, combat: &Prob<Combat<TCombatType, TUnit>>) {
+    fn accumulate_combat(&mut self, combat: &Prob<Combat<TBattlePhase, TUnit>>) {
         let p = combat.p;
         let combat = &combat.item;
         self.total_p += p;
@@ -95,9 +95,9 @@ struct BattleSideBuilder {
 }
 
 impl BattleSideBuilder {
-    pub fn accumulate<TCombatType: CombatType, TUnit: Unit>(
+    pub fn accumulate<TBattlePhase: BattlePhase, TUnit: Unit>(
         &mut self,
-        combat: &Combat<TCombatType, TUnit>,
+        combat: &Combat<TBattlePhase, TUnit>,
         p: Probability,
         total_p: Probability,
         side: Side,

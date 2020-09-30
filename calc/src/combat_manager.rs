@@ -3,28 +3,28 @@ use std::marker::PhantomData;
 
 /// Manages the resolution of individual combats.
 pub struct CombatManager<
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
     THit: Hit<TUnit>,
-    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TRollSelector: RollSelector<TBattlePhase, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 > {
     attacker_survivor_selector: TSurvivorSelector,
     defender_survivor_selector: TSurvivorSelector,
     roll_selector: TRollSelector,
     roller: Roller<TUnit, THit>,
-    phantom_combat_type: PhantomData<TCombatType>,
+    phantom_battle_phase: PhantomData<TBattlePhase>,
     phantom_hit: PhantomData<THit>,
     phantom_unit: PhantomData<TUnit>,
 }
 
-impl<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
-    CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>
+impl<TBattlePhase, THit, TUnit, TRollSelector, TSurvivorSelector>
+    CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
     THit: Hit<TUnit>,
-    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TRollSelector: RollSelector<TBattlePhase, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
     /// Constructs a new combat manager with the given survivor selectors and roll selectors.
@@ -37,7 +37,7 @@ where
             attacker_survivor_selector,
             defender_survivor_selector,
             roll_selector,
-            phantom_combat_type: PhantomData,
+            phantom_battle_phase: PhantomData,
             phantom_hit: PhantomData,
             phantom_unit: PhantomData,
             roller: Default::default(),
@@ -47,9 +47,9 @@ where
     /// Resolves a combat into a combat result.
     pub fn resolve(
         &mut self,
-        combat: &Prob<Combat<TCombatType, TUnit>>,
-        next_combat_type: TCombatType,
-    ) -> CombatResult<TCombatType, TUnit> {
+        combat: &Prob<Combat<TBattlePhase, TUnit>>,
+        next_battle_phase: TBattlePhase,
+    ) -> CombatResult<TBattlePhase, TUnit> {
         let probability = combat.p;
         let combat = &combat.item;
         let attackers = &combat.attackers;
@@ -73,8 +73,8 @@ where
             .select(defenders, &attacking_hits);
 
         CombatResult {
-            combat_type: combat.combat_type,
-            next_combat_type,
+            battle_phase: combat.battle_phase,
+            next_battle_phase,
             surviving_attackers,
             surviving_defenders,
             probability,

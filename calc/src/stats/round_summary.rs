@@ -49,8 +49,10 @@ impl Sub for RoundSummary {
     }
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> From<&RoundResult<TCombatType, TUnit>> for RoundSummary {
-    fn from(result: &RoundResult<TCombatType, TUnit>) -> RoundSummary {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> From<&RoundResult<TBattlePhase, TUnit>>
+    for RoundSummary
+{
+    fn from(result: &RoundResult<TBattlePhase, TUnit>) -> RoundSummary {
         RoundSummary {
             index: result.index,
             attacker: RoundSideSummary::from_round_result(result, Side::Attacker),
@@ -89,8 +91,8 @@ pub struct RoundSideSummary {
 
 impl RoundSideSummary {
     /// Constructs a new side summary for the given side from the round result.
-    pub fn from_round_result<TCombatType: CombatType, TUnit: Unit>(
-        result: &RoundResult<TCombatType, TUnit>,
+    pub fn from_round_result<TBattlePhase: BattlePhase, TUnit: Unit>(
+        result: &RoundResult<TBattlePhase, TUnit>,
         side: Side,
     ) -> Self {
         let iter = match side {
@@ -146,8 +148,8 @@ impl Sub for RoundSideSummary {
     }
 }
 
-fn sum_win_p<TCombatType: CombatType, TUnit: Unit>(
-    outcomes: &[Prob<Combat<TCombatType, TUnit>>],
+fn sum_win_p<TBattlePhase: BattlePhase, TUnit: Unit>(
+    outcomes: &[Prob<Combat<TBattlePhase, TUnit>>],
     side: Option<Side>,
 ) -> Probability {
     outcomes

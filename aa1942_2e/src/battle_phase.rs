@@ -2,7 +2,7 @@ use crate::*;
 use calc::{CombatSequence, Force};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub enum CombatType {
+pub enum BattlePhase {
     PreBattle,
     Bombardment,
     AntiAir,
@@ -10,11 +10,11 @@ pub enum CombatType {
     General,
 }
 
-impl CombatType {
+impl BattlePhase {
     pub fn create_sequence(
         attackers: &Force<Unit>,
         defenders: &Force<Unit>,
-    ) -> CombatSequence<CombatType> {
+    ) -> CombatSequence<BattlePhase> {
         let mut start = Vec::new();
 
         let units = attackers
@@ -26,41 +26,44 @@ impl CombatType {
             .collect::<Vec<_>>();
         if units
             .iter()
-            .any(|u| u.combat_type() == CombatType::Bombardment)
+            .any(|u| u.battle_phase() == BattlePhase::Bombardment)
         {
-            start.push(CombatType::Bombardment);
+            start.push(BattlePhase::Bombardment);
         }
-        if units.iter().any(|u| u.combat_type() == CombatType::AntiAir) {
-            start.push(CombatType::AntiAir);
+        if units
+            .iter()
+            .any(|u| u.battle_phase() == BattlePhase::AntiAir)
+        {
+            start.push(BattlePhase::AntiAir);
         }
 
         let mut cycle = Vec::new();
         if units
             .iter()
-            .any(|u| u.combat_type() == CombatType::SurpriseStrike)
+            .any(|u| u.battle_phase() == BattlePhase::SurpriseStrike)
         {
-            cycle.push(CombatType::SurpriseStrike);
+            cycle.push(BattlePhase::SurpriseStrike);
         }
-        cycle.push(CombatType::General);
+        cycle.push(BattlePhase::General);
 
         CombatSequence::new(start, cycle)
     }
 }
 
-impl calc::CombatType for CombatType {
+impl calc::BattlePhase for BattlePhase {
     fn prebattle() -> Self {
-        CombatType::PreBattle
+        BattlePhase::PreBattle
     }
 }
 
-impl std::fmt::Display for CombatType {
+impl std::fmt::Display for BattlePhase {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            CombatType::PreBattle => "Pre-Battle",
-            CombatType::Bombardment => "Bombardment",
-            CombatType::AntiAir => "Anti-Air",
-            CombatType::SurpriseStrike => "Surprise Strike",
-            CombatType::General => "General Combat",
+            BattlePhase::PreBattle => "Pre-Battle",
+            BattlePhase::Bombardment => "Bombardment",
+            BattlePhase::AntiAir => "Anti-Air",
+            BattlePhase::SurpriseStrike => "Surprise Strike",
+            BattlePhase::General => "General Combat",
         };
 
         write!(f, "{}", name)

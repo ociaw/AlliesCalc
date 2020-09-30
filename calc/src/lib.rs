@@ -16,7 +16,7 @@ mod round_result;
 mod survivor_selector;
 mod unit;
 
-pub use combat::{Combat, CombatContext, CombatResult, CombatSequence, CombatType, Side};
+pub use combat::{BattlePhase, Combat, CombatContext, CombatResult, CombatSequence, Side};
 pub use combat_manager::CombatManager;
 pub use hit::Hit;
 pub use prob::{Prob, ProbDist, ProbDistBuilder};

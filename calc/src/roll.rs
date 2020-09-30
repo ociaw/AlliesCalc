@@ -23,15 +23,15 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Roll<TUnit, THit> {
 }
 
 /// A type that selects rolls according to the combat context.
-pub trait RollSelector<TCombatType, TUnit, THit>
+pub trait RollSelector<TBattlePhase, TUnit, THit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
     THit: Hit<TUnit>,
 {
     /// Selects rolls based to the combat context.
     fn get_rolls(
         &self,
-        context: &CombatContext<TCombatType, TUnit>,
+        context: &CombatContext<TBattlePhase, TUnit>,
     ) -> QuantDist<Roll<TUnit, THit>>;
 }

@@ -1,18 +1,18 @@
-mod combattype;
+mod battle_phase;
 mod hit;
 mod roll_selector;
 mod survivor_selector;
 mod unit;
 
 pub use crate::stats::*;
-pub use combattype::CombatType;
+pub use battle_phase::BattlePhase;
 pub use hit::Hit;
 pub use roll_selector::RollSelector;
 pub use survivor_selector::SurvivorSelector;
 pub use unit::Unit;
 
 use calc::*;
-pub fn get_combat_manager() -> CombatManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>
+pub fn get_combat_manager() -> CombatManager<BattlePhase, Unit, Hit, RollSelector, SurvivorSelector>
 {
     let attacker_survivor_selector = SurvivorSelector {
         removal_order: SurvivorSelector::default_attacker_order(),
@@ -34,8 +34,8 @@ pub fn get_combat_manager() -> CombatManager<CombatType, Unit, Hit, RollSelector
 pub fn create_round_manager(
     attackers: Force<Unit>,
     defenders: Force<Unit>,
-) -> RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector> {
-    let sequence = CombatType::create_sequence(&attackers, &defenders);
+) -> RoundManager<BattlePhase, Unit, Hit, RollSelector, SurvivorSelector> {
+    let sequence = BattlePhase::create_sequence(&attackers, &defenders);
     let combat_manager = get_combat_manager();
 
     RoundManager::new(combat_manager, sequence.clone(), attackers, defenders)
@@ -403,10 +403,10 @@ mod tests {
         attackers: Force<Unit>,
         defenders: Force<Unit>,
     ) -> (
-        Summarizer<CombatType, Unit>,
-        RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>,
+        Summarizer<BattlePhase, Unit>,
+        RoundManager<BattlePhase, Unit, Hit, RollSelector, SurvivorSelector>,
     ) {
-        let sequence = CombatType::create_sequence(&attackers, &defenders);
+        let sequence = BattlePhase::create_sequence(&attackers, &defenders);
         let combat_manager = get_combat_manager();
 
         let mut round_manager =
@@ -417,9 +417,9 @@ mod tests {
     }
 
     fn run_to_completion<'a>(
-        round_manager: &'a mut RoundManager<CombatType, Unit, Hit, RollSelector, SurvivorSelector>,
-        summary: &mut Summarizer<CombatType, Unit>,
-    ) -> &'a RoundResult<CombatType, Unit> {
+        round_manager: &'a mut RoundManager<BattlePhase, Unit, Hit, RollSelector, SurvivorSelector>,
+        summary: &mut Summarizer<BattlePhase, Unit>,
+    ) -> &'a RoundResult<BattlePhase, Unit> {
         while !round_manager.is_complete() {
             summary.add_round(&round_manager.advance_round());
         }

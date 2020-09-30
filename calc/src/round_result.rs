@@ -1,15 +1,15 @@
 use crate::{
-    Combat, CombatResult, CombatType, Force, Prob, ProbDist, ProbDistBuilder, Probability, Pruner,
+    BattlePhase, Combat, CombatResult, Force, Prob, ProbDist, ProbDistBuilder, Probability, Pruner,
     Unit,
 };
 
 /// An aggregate of all all the combat that occurred in a round.
 #[derive(Debug)]
-pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
+pub struct RoundResult<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub index: usize,
-    pub pending: ProbDist<Combat<TCombatType, TUnit>>,
-    pub completed: ProbDist<Combat<TCombatType, TUnit>>,
-    pub pruned: ProbDist<Combat<TCombatType, TUnit>>,
+    pub pending: ProbDist<Combat<TBattlePhase, TUnit>>,
+    pub completed: ProbDist<Combat<TBattlePhase, TUnit>>,
+    pub pruned: ProbDist<Combat<TBattlePhase, TUnit>>,
     pub surviving_attackers: ProbDist<Force<TUnit>>,
     pub surviving_defenders: ProbDist<Force<TUnit>>,
     pub total_probability: Probability,
@@ -18,7 +18,7 @@ pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
     pub stalemate: bool,
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResult<TCombatType, TUnit> {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> Default for RoundResult<TBattlePhase, TUnit> {
     fn default() -> Self {
         RoundResult {
             index: 0,
@@ -35,19 +35,19 @@ impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResult<TCombatType, 
     }
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResult<TBattlePhase, TUnit> {
     /// Constructs a new `RoundResult` with the given battle phase, attackers, and defenders.
     pub fn new(
-        combat_type: TCombatType,
+        battle_phase: TBattlePhase,
         attackers: Force<TUnit>,
         defenders: Force<TUnit>,
-    ) -> RoundResult<TCombatType, TUnit> {
+    ) -> RoundResult<TBattlePhase, TUnit> {
         RoundResult {
             pending: vec![Prob {
                 item: Combat {
                     attackers: attackers.clone(),
                     defenders: defenders.clone(),
-                    combat_type,
+                    battle_phase: battle_phase,
                 },
                 p: Probability::one(),
             }]
@@ -80,17 +80,17 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
 
 /// A builder to incrementally construct a round result.
 #[derive(Debug)]
-pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
+pub struct RoundResultBuilder<TBattlePhase: BattlePhase, TUnit: Unit> {
     // TODO: Why are these public?
     pub index: usize,
-    pub pending: ProbDistBuilder<Combat<TCombatType, TUnit>>,
-    pub completed: ProbDistBuilder<Combat<TCombatType, TUnit>>,
-    pub pruned: ProbDistBuilder<Combat<TCombatType, TUnit>>,
+    pub pending: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
+    pub completed: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
+    pub pruned: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
     pub surviving_attackers: ProbDistBuilder<Force<TUnit>>,
     pub surviving_defenders: ProbDistBuilder<Force<TUnit>>,
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit> {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TUnit> {
     // Constructs a new `RoundResultBuilder`.
     pub fn new(round_index: usize) -> Self {
         RoundResultBuilder {
@@ -108,7 +108,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
         self,
         pruned_count: usize,
         pruned_p: Probability,
-    ) -> RoundResult<TCombatType, TUnit> {
+    ) -> RoundResult<TBattlePhase, TUnit> {
         let pending = self.pending.build();
         let completed = self.completed.build();
         let pruned = self.pruned.build();
@@ -134,7 +134,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
     }
 
     /// Adds the combat result to this RoundResult builder.
-    pub fn add(&mut self, combat_result: CombatResult<TCombatType, TUnit>, pruner: &mut Pruner) {
+    pub fn add(&mut self, combat_result: CombatResult<TBattlePhase, TUnit>, pruner: &mut Pruner) {
         let attackers = combat_result.surviving_attackers.outcomes();
         let defenders = combat_result.surviving_defenders.outcomes();
         for attacker in attackers {
@@ -143,7 +143,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
                 let combat = Combat {
                     attackers: attacker.item.clone(),
                     defenders: defender.item.clone(),
-                    combat_type: combat_result.next_combat_type,
+                    battle_phase: combat_result.next_battle_phase,
                 };
 
                 let combat = Prob { item: combat, p };

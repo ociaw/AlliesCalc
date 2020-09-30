@@ -2,46 +2,46 @@ use crate::*;
 
 /// Manages the rounds of the battle.
 pub struct RoundManager<
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
     THit: Hit<TUnit>,
-    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TRollSelector: RollSelector<TBattlePhase, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 > {
-    combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
-    sequence: CombatSequence<TCombatType>,
+    combat_manager: CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>,
+    sequence: CombatSequence<TBattlePhase>,
     pruner: Pruner,
     round_index: usize,
-    last_round: RoundResult<TCombatType, TUnit>,
+    last_round: RoundResult<TBattlePhase, TUnit>,
     last_probability: Probability,
     probability_run_count: usize,
 }
 
-impl<TCombatType, THit, TUnit, TRollSelector, TSurvivorSelector>
-    RoundManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>
+impl<TBattlePhase, THit, TUnit, TRollSelector, TSurvivorSelector>
+    RoundManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
     THit: Hit<TUnit>,
-    TRollSelector: RollSelector<TCombatType, TUnit, THit>,
+    TRollSelector: RollSelector<TBattlePhase, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
     /// Constructs a new `RoundManager` with the given `CombatManager`, `CombatSequence`,
     /// attacking force, and defending force.
     pub fn new(
-        combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
-        sequence: CombatSequence<TCombatType>,
+        combat_manager: CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>,
+        sequence: CombatSequence<TBattlePhase>,
         attackers: Force<TUnit>,
         defenders: Force<TUnit>,
     ) -> Self {
         let round_index = 0;
-        let combat_type = sequence.combat_at(round_index + 1);
+        let battle_phase = sequence.combat_at(round_index + 1);
         RoundManager {
             combat_manager,
             sequence,
             pruner: Default::default(),
             round_index,
-            last_round: RoundResult::new(combat_type, attackers, defenders),
+            last_round: RoundResult::new(battle_phase, attackers, defenders),
             last_probability: Probability::zero(),
             probability_run_count: 0,
         }
@@ -49,14 +49,14 @@ where
 
     /// Computes the next round of the battle and returns the result.
     #[allow(clippy::float_cmp)]
-    pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
+    pub fn advance_round(&mut self) -> &RoundResult<TBattlePhase, TUnit> {
         self.round_index += 1;
-        let next_combat_type = self.sequence.combat_at(self.round_index + 1);
+        let next_battle_phase = self.sequence.combat_at(self.round_index + 1);
         let mut result = RoundResultBuilder::new(self.round_index);
         let old_pruned_count = self.pruned_count();
         let old_pruned_p = self.pruned_p();
         for combat in self.last_round.pending.outcomes() {
-            let combat_result = self.combat_manager.resolve(combat, next_combat_type);
+            let combat_result = self.combat_manager.resolve(combat, next_battle_phase);
             result.add(combat_result, &mut self.pruner);
         }
 
@@ -87,7 +87,7 @@ where
     }
 
     /// Gets the result of the last round that was computed.
-    pub fn last_round(&self) -> &RoundResult<TCombatType, TUnit> {
+    pub fn last_round(&self) -> &RoundResult<TBattlePhase, TUnit> {
         &self.last_round
     }
 

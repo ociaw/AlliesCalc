@@ -147,7 +147,6 @@ impl<T: Eq + Hash> QuantDistBuilder<T> {
         }
     }
 
-
     /// Removes all items of `item` from the distribution and returns the number removed.
     pub fn remove_all(&mut self, item: &T) -> u32 {
         let index = self.find_index(item);

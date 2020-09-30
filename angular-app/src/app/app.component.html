@@ -10,7 +10,7 @@
   </div>
 </section>
 <section>
-  <h3>Round {{ (roundStats | async)?.roundCount }} - {{ (roundStats | async)?.combatType }}</h3>
+  <h3>Round {{ (roundStats | async)?.roundCount }} - {{ (roundStats | async)?.battlePhase }}</h3>
   <div>{{ (roundStats | async )?.pendingCount }} pending outcomes, {{ (roundStats | async )?.completedCount }} completed outcomes, {{ (roundStats | async )?.prunedCount }} pruned ({{ (roundStats | async )?.prunedP | percent:'1.2-2' }})</div>
   <div>Reached in {{ (roundStats | async )?.probability | percent:'1.2-2' }} of battles</div>
   <div><button on-click="nextRound()">Next Round</button></div>

@@ -5,7 +5,7 @@ pub struct RollSelector;
 
 #[derive(Debug)]
 struct Context {
-    pub combat: CombatType,
+    pub combat: BattlePhase,
     pub defending: bool,
     pub boost_count: u32,
     pub hostile_air_count: u32,
@@ -14,9 +14,9 @@ struct Context {
 }
 
 impl Context {
-    fn convert(combat_context: &calc::CombatContext<CombatType, Unit>) -> Context {
+    fn convert(combat_context: &calc::CombatContext<BattlePhase, Unit>) -> Context {
         Context {
-            combat: combat_context.combat_type,
+            combat: combat_context.battle_phase,
             defending: combat_context.defending,
             boost_count: combat_context
                 .friendlies()
@@ -46,10 +46,10 @@ impl Context {
     }
 }
 
-impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
+impl calc::RollSelector<BattlePhase, Unit, Hit> for RollSelector {
     fn get_rolls(
         &self,
-        context: &calc::CombatContext<CombatType, Unit>,
+        context: &calc::CombatContext<BattlePhase, Unit>,
     ) -> calc::QuantDist<Roll<Unit, Hit>> {
         let force = context.friendlies();
         let context = Context::convert(context);
@@ -59,12 +59,12 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
             let unit = quant.item;
             let count = quant.count;
 
-            let unit_combat = if unit.combat_type() == CombatType::SurpriseStrike
+            let unit_combat = if unit.battle_phase() == BattlePhase::SurpriseStrike
                 && context.hostile_unsurprisable
             {
-                CombatType::General
+                BattlePhase::General
             } else {
-                unit.combat_type()
+                unit.battle_phase()
             };
 
             if current_combat != unit_combat {
@@ -96,7 +96,7 @@ impl calc::RollSelector<CombatType, Unit, Hit> for RollSelector {
                 }
             };
 
-            let multiplier = if unit.combat_type() == CombatType::AntiAir {
+            let multiplier = if unit.battle_phase() == BattlePhase::AntiAir {
                 core::cmp::min(3, context.hostile_air_count)
             } else {
                 1

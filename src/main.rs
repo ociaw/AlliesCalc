@@ -1,4 +1,3 @@
-use aa1942_2e::CombatType as CombatType1942_2E;
 use aa1942_2e::Unit as Unit1942_2E;
 use calc::stats::*;
 use calc::*;
@@ -29,7 +28,7 @@ fn main() {
         .into(),
     );
 
-    let sequence = CombatType1942_2E::create_sequence(&attackers, &defenders);
+    let sequence = aa1942_2e::BattlePhase::create_sequence(&attackers, &defenders);
     let mut round_manager = aa1942_2e::create_round_manager(attackers, defenders);
     round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
     let mut summarizer = Summarizer::new(round_manager.last_round());

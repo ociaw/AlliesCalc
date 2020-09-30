@@ -15,13 +15,13 @@ pub fn set_panic_hook() {
 
 type Unit1942_2E = aa1942_2e::Unit;
 type RoundManagerAA1942_2E = calc::RoundManager<
-    aa1942_2e::CombatType,
+    aa1942_2e::BattlePhase,
     Unit1942_2E,
     aa1942_2e::Hit,
     aa1942_2e::RollSelector,
     aa1942_2e::SurvivorSelector,
 >;
-type CombatSequenceAA1942_2E = calc::CombatSequence<aa1942_2e::CombatType>;
+type CombatSequenceAA1942_2E = calc::CombatSequence<aa1942_2e::BattlePhase>;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -129,14 +129,14 @@ pub struct Battle {
     round_manager: RoundManagerAA1942_2E,
     sequence: CombatSequenceAA1942_2E,
     total_pruned_p: f64,
-    summarizer: Summarizer<aa1942_2e::CombatType, Unit1942_2E>,
+    summarizer: Summarizer<aa1942_2e::BattlePhase, Unit1942_2E>,
 }
 
 #[wasm_bindgen]
 impl Battle {
     fn new(attackers: Force<Unit1942_2E>, defenders: Force<Unit1942_2E>) -> Self {
         use core::convert::TryInto;
-        let sequence = aa1942_2e::CombatType::create_sequence(&attackers, &defenders);
+        let sequence = aa1942_2e::BattlePhase::create_sequence(&attackers, &defenders);
         let mut round_manager = aa1942_2e::create_round_manager(attackers, defenders);
         round_manager.set_prune_threshold(0.0000000001.try_into().unwrap());
         let summarizer = Summarizer::new(round_manager.last_round());
@@ -158,8 +158,8 @@ impl Battle {
         self.round_manager.round_index() as u32
     }
 
-    #[wasm_bindgen(js_name = roundCombatType)]
-    pub fn round_combat_type(&self) -> String {
+    #[wasm_bindgen(js_name = roundBattlePhase)]
+    pub fn round_battle_phase(&self) -> String {
         format!(
             "{}",
             self.sequence.combat_at(self.round_manager.round_index())
@@ -174,7 +174,7 @@ impl Battle {
 
         RoundStats {
             round_count,
-            combat_type: self.round_combat_type(),
+            battle_phase: self.round_battle_phase(),
             p: round.total_probability.into(),
             pending_count: round.pending.len() as u32,
             completed_count: round.completed.len() as u32,
@@ -243,7 +243,7 @@ impl Default for Battle {
 #[wasm_bindgen]
 pub struct RoundStats {
     round_count: u32,
-    combat_type: String,
+    battle_phase: String,
     p: f64,
     pending_count: u32,
     completed_count: u32,
@@ -258,9 +258,9 @@ impl RoundStats {
         self.round_count
     }
 
-    #[wasm_bindgen(getter = combatType)]
-    pub fn combat_type(&self) -> String {
-        self.combat_type.clone()
+    #[wasm_bindgen(getter = battlePhase)]
+    pub fn battle_phase(&self) -> String {
+        self.battle_phase.clone()
     }
 
     #[wasm_bindgen(getter)]

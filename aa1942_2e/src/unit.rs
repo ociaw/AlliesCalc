@@ -43,14 +43,14 @@ impl Unit {
         self == Unit::Artillery
     }
 
-    pub fn combat_type(self) -> crate::CombatType {
-        use crate::CombatType;
+    pub fn battle_phase(self) -> crate::BattlePhase {
+        use crate::BattlePhase;
 
         match self {
-            Unit::BombardingBattleship | Unit::BombardingCruiser => CombatType::Bombardment,
-            Unit::AntiAir => CombatType::AntiAir,
-            Unit::Submarine => CombatType::SurpriseStrike,
-            _ => CombatType::General,
+            Unit::BombardingBattleship | Unit::BombardingCruiser => BattlePhase::Bombardment,
+            Unit::AntiAir => BattlePhase::AntiAir,
+            Unit::Submarine => BattlePhase::SurpriseStrike,
+            _ => BattlePhase::General,
         }
     }
 

@@ -2,7 +2,7 @@ use crate::*;
 use std::{fmt::Debug, hash::Hash};
 
 /// Represents the different phases of battle.
-pub trait CombatType: Debug + Clone + Copy + Eq + Ord + Hash + Sized {
+pub trait BattlePhase: Debug + Clone + Copy + Eq + Ord + Hash + Sized {
     /// Returns the battle phase that indicates the battle hasn't begun.
     fn prebattle() -> Self;
 }
@@ -32,15 +32,15 @@ pub trait CombatType: Debug + Clone + Copy + Eq + Ord + Hash + Sized {
 /// And so on. If `start` is empty, the sequence will proceed directly to `cycle`. `cycle`
 /// must contain at least one battle phase.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CombatSequence<TCombatType: CombatType> {
-    start: Vec<TCombatType>,
-    cycle: Vec<TCombatType>,
+pub struct CombatSequence<TBattlePhase: BattlePhase> {
+    start: Vec<TBattlePhase>,
+    cycle: Vec<TBattlePhase>,
 }
 
-impl<TCombatType: CombatType> CombatSequence<TCombatType> {
+impl<TBattlePhase: BattlePhase> CombatSequence<TBattlePhase> {
     /// Constructs a new `CombatSequence` with the the given `start` and `cycle`. `cycle` must not
     /// be empty.
-    pub fn new(start: Vec<TCombatType>, cycle: Vec<TCombatType>) -> CombatSequence<TCombatType> {
+    pub fn new(start: Vec<TBattlePhase>, cycle: Vec<TBattlePhase>) -> CombatSequence<TBattlePhase> {
         if cycle.is_empty() {
             panic!("Cycle must not be empty.");
         }
@@ -49,19 +49,19 @@ impl<TCombatType: CombatType> CombatSequence<TCombatType> {
     }
 
     /// Returns a slice of the starting combat sequence.
-    pub fn start(&self) -> &[TCombatType] {
+    pub fn start(&self) -> &[TBattlePhase] {
         &self.start
     }
 
     /// Returns a slice of the cycling combat sequence.
-    pub fn cycle(&self) -> &[TCombatType] {
+    pub fn cycle(&self) -> &[TBattlePhase] {
         &self.cycle
     }
 
     /// Returns the combat phase occurring at the indicated round index.
-    pub fn combat_at(&self, index: usize) -> TCombatType {
+    pub fn combat_at(&self, index: usize) -> TBattlePhase {
         if index == 0 {
-            return CombatType::prebattle();
+            return BattlePhase::prebattle();
         }
         // Make index zero based for start
         let index = index - 1;
@@ -83,22 +83,22 @@ pub enum Side {
 
 /// A combat occurring as a specific battle phase with the given forces attacking and defending.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Combat<TCombatType, TUnit>
+pub struct Combat<TBattlePhase, TUnit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// The phase of battle.
-    pub combat_type: TCombatType,
+    pub battle_phase: TBattlePhase,
     /// The attacking force.
     pub attackers: Force<TUnit>,
     /// The defending force.
     pub defenders: Force<TUnit>,
 }
 
-impl<TCombatType, TUnit> Combat<TCombatType, TUnit>
+impl<TBattlePhase, TUnit> Combat<TBattlePhase, TUnit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// Returns the winner of the combat, or None if both sides are either undefeated or defeated.
@@ -118,13 +118,13 @@ where
 
 /// Context of a combat used for selecting rolls.
 #[derive(Debug)]
-pub struct CombatContext<TCombatType, TUnit>
+pub struct CombatContext<TBattlePhase, TUnit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// The phase of battle.
-    pub combat_type: TCombatType,
+    pub battle_phase: TBattlePhase,
     /// The attacking force.
     pub attackers: Force<TUnit>,
     /// The defending force.
@@ -133,15 +133,15 @@ where
     pub defending: bool,
 }
 
-impl<TCombatType, TUnit> CombatContext<TCombatType, TUnit>
+impl<TBattlePhase, TUnit> CombatContext<TBattlePhase, TUnit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// Constructs a new context from a `Combat` and the `Side` of the force.
-    pub fn from_combat(combat: &Combat<TCombatType, TUnit>, defending: bool) -> Self {
+    pub fn from_combat(combat: &Combat<TBattlePhase, TUnit>, defending: bool) -> Self {
         Self {
-            combat_type: combat.combat_type,
+            battle_phase: combat.battle_phase,
             attackers: combat.attackers.clone(),
             defenders: combat.defenders.clone(),
             defending,
@@ -169,15 +169,15 @@ where
 
 ///
 #[derive(Debug)]
-pub struct CombatResult<TCombatType, TUnit>
+pub struct CombatResult<TBattlePhase, TUnit>
 where
-    TCombatType: CombatType,
+    TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// The phase of battle the combat took place in.
-    pub combat_type: TCombatType,
+    pub battle_phase: TBattlePhase,
     /// The phase of battle of the next combat.
-    pub next_combat_type: TCombatType,
+    pub next_battle_phase: TBattlePhase,
     /// A `ProbDist` of the attackers who could have survived the combat.
     pub surviving_attackers: ProbDist<Force<TUnit>>,
     /// A `ProbDist` of the defenders who could have survived the combat.

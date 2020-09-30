@@ -3,18 +3,18 @@ use crate::*;
 
 /// A summary of an entire battle.
 #[derive(Debug, Clone, PartialEq)]
-pub struct BattleSummary<TCombatType: CombatType, TUnit: Unit> {
+pub struct BattleSummary<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub prebattle: RoundSummary,
     pub round_summaries: Vec<RoundSummary>,
     pub attacker: BattleSideSummary,
     pub defender: BattleSideSummary,
-    pub completed_combats: ProbDist<Combat<TCombatType, TUnit>>,
+    pub completed_combats: ProbDist<Combat<TBattlePhase, TUnit>>,
     pub draw_p: Probability,
     pub total_p: Probability,
     pub pruned_p: Probability,
 }
 
-impl<TCombatType: CombatType, TUnit: Unit> BattleSummary<TCombatType, TUnit> {
+impl<TBattlePhase: BattlePhase, TUnit: Unit> BattleSummary<TBattlePhase, TUnit> {
     /// Gets the number of rounds that took place in the battle.
     pub fn round_count(&self) -> usize {
         self.round_summaries.len()
