@@ -55,8 +55,8 @@ where
         let attackers = &combat.attackers;
         let defenders = &combat.defenders;
 
-        let attack_context = CombatContext::from_combat(combat, false);
-        let defense_context = CombatContext::from_combat(combat, true);
+        let attack_context = CombatContext::from_combat(combat, Side::Attacker);
+        let defense_context = CombatContext::from_combat(combat, Side::Defender);
 
         let attack_strike = self.roll_selector.get_rolls(&attack_context);
         let defense_strike = self.roll_selector.get_rolls(&defense_context);

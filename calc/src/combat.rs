@@ -129,8 +129,8 @@ where
     pub attackers: Force<TUnit>,
     /// The defending force.
     pub defenders: Force<TUnit>,
-    /// Whether or not this context represents the defenders or the attackers.
-    pub defending: bool,
+    /// The side this context represents.
+    pub side: Side,
 }
 
 impl<TBattlePhase, TUnit> CombatContext<TBattlePhase, TUnit>
@@ -139,30 +139,28 @@ where
     TUnit: Unit,
 {
     /// Constructs a new context from a `Combat` and the `Side` of the force.
-    pub fn from_combat(combat: &Combat<TBattlePhase, TUnit>, defending: bool) -> Self {
+    pub fn from_combat(combat: &Combat<TBattlePhase, TUnit>, side: Side) -> Self {
         Self {
             battle_phase: combat.battle_phase,
             attackers: combat.attackers.clone(),
             defenders: combat.defenders.clone(),
-            defending,
+            side,
         }
     }
 
     /// Returns the friendly force.
     pub fn friendlies(&self) -> &QuantDist<TUnit> {
-        if self.defending {
-            &self.defenders
-        } else {
-            &self.attackers
+        match self.side {
+            Side::Attacker => &self.attackers,
+            Side::Defender => &self.defenders,
         }
     }
 
     /// Returns the hostile force.
     pub fn hostiles(&self) -> &QuantDist<TUnit> {
-        if self.defending {
-            &self.attackers
-        } else {
-            &self.defenders
+        match self.side {
+            Side::Attacker => &self.defenders,
+            Side::Defender => &self.attackers,
         }
     }
 }

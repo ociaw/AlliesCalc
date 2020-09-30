@@ -6,7 +6,7 @@ pub struct RollSelector;
 #[derive(Debug)]
 struct Context {
     pub combat: BattlePhase,
-    pub defending: bool,
+    pub side: Side,
     pub boost_count: u32,
     pub hostile_air_count: u32,
     pub friendly_anti_sub: bool,
@@ -17,7 +17,7 @@ impl Context {
     fn convert(combat_context: &calc::CombatContext<BattlePhase, Unit>) -> Context {
         Context {
             combat: combat_context.battle_phase,
-            defending: combat_context.defending,
+            side: combat_context.side,
             boost_count: combat_context
                 .friendlies()
                 .outcomes()
@@ -51,6 +51,8 @@ impl calc::RollSelector<BattlePhase, Unit, Hit> for RollSelector {
         &self,
         context: &calc::CombatContext<BattlePhase, Unit>,
     ) -> calc::QuantDist<Roll<Unit, Hit>> {
+        use calc::Unit;
+
         let force = context.friendlies();
         let context = Context::convert(context);
         let current_combat = context.combat;
@@ -77,14 +79,7 @@ impl calc::RollSelector<BattlePhase, Unit, Hit> for RollSelector {
             };
             let base_count = count - boosted_count;
 
-            let base_strength = {
-                use calc::Unit;
-                if context.defending {
-                    unit.defense()
-                } else {
-                    unit.attack()
-                }
-            };
+            let base_strength = unit.strength(context.side);
             let boosted_strength = unit.boosted_strength().unwrap_or(0);
 
             let hit = {
