@@ -48,7 +48,6 @@ where
     pub fn resolve(
         &mut self,
         combat: &Prob<Combat<TBattlePhase, TUnit>>,
-        next_battle_phase: TBattlePhase,
     ) -> CombatResult<TBattlePhase, TUnit> {
         let probability = combat.p;
         let combat = &combat.item;
@@ -74,7 +73,6 @@ where
 
         CombatResult {
             battle_phase: combat.battle_phase,
-            next_battle_phase,
             surviving_attackers,
             surviving_defenders,
             probability,

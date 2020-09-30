@@ -165,8 +165,6 @@ where
 {
     /// The phase of battle the combat took place in.
     pub battle_phase: TBattlePhase,
-    /// The phase of battle of the next combat.
-    pub next_battle_phase: TBattlePhase,
     /// A `ProbDist` of the attackers who could have survived the combat.
     pub surviving_attackers: ProbDist<Force<TUnit>>,
     /// A `ProbDist` of the defenders who could have survived the combat.

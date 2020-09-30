@@ -88,11 +88,12 @@ pub struct RoundResultBuilder<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub pruned: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
     pub surviving_attackers: ProbDistBuilder<Force<TUnit>>,
     pub surviving_defenders: ProbDistBuilder<Force<TUnit>>,
+    next_battle_phase: TBattlePhase,
 }
 
 impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TUnit> {
     // Constructs a new `RoundResultBuilder`.
-    pub fn new(round_index: usize) -> Self {
+    pub fn new(round_index: usize, next_battle_phase: TBattlePhase) -> Self {
         RoundResultBuilder {
             index: round_index,
             pending: ProbDistBuilder::default(),
@@ -100,6 +101,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
             pruned: ProbDistBuilder::default(),
             surviving_attackers: ProbDistBuilder::default(),
             surviving_defenders: ProbDistBuilder::default(),
+            next_battle_phase,
         }
     }
 
@@ -143,7 +145,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
                 let combat = Combat {
                     attackers: attacker.item.clone(),
                     defenders: defender.item.clone(),
-                    battle_phase: combat_result.next_battle_phase,
+                    battle_phase: self.next_battle_phase,
                 };
 
                 let combat = Prob { item: combat, p };

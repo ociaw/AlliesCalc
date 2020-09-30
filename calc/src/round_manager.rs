@@ -52,11 +52,11 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TBattlePhase, TUnit> {
         self.round_index += 1;
         let next_battle_phase = self.sequence.combat_at(self.round_index + 1);
-        let mut result = RoundResultBuilder::new(self.round_index);
+        let mut result = RoundResultBuilder::new(self.round_index, next_battle_phase);
         let old_pruned_count = self.pruned_count();
         let old_pruned_p = self.pruned_p();
         for combat in self.last_round.pending.outcomes() {
-            let combat_result = self.combat_manager.resolve(combat, next_battle_phase);
+            let combat_result = self.combat_manager.resolve(combat);
             result.add(combat_result, &mut self.pruner);
         }
 
