@@ -76,10 +76,9 @@ fn main() {
     let summary = summarizer.summarize();
 
     println!(
-        "{} rounds and {} outcomes analyzed, {} ({:.2}%) outcomes discarded",
+        "{} rounds and {} outcomes analyzed, {:.2}% of outcomes discarded",
         summary.round_count(),
         summary.completed_combats.len(),
-        round_manager.pruned_count(),
         summary.pruned_p * 100.0
     );
     println!("Winner      Prob.");

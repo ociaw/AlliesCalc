@@ -10,7 +10,7 @@ pub struct RoundManager<
 > {
     combat_manager: CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>,
     sequence: CombatSequence<TBattlePhase>,
-    pruner: Pruner,
+    prune_threshold: Probability,
     round_index: usize,
     last_round: RoundResult<TBattlePhase, TUnit>,
     last_probability: Probability,
@@ -39,7 +39,7 @@ where
         RoundManager {
             combat_manager,
             sequence,
-            pruner: Default::default(),
+            prune_threshold: Default::default(),
             round_index,
             last_round: RoundResult::new(battle_phase, attackers, defenders),
             last_probability: Probability::zero(),
@@ -52,18 +52,14 @@ where
     pub fn advance_round(&mut self) -> &RoundResult<TBattlePhase, TUnit> {
         self.round_index += 1;
         let next_battle_phase = self.sequence.combat_at(self.round_index + 1);
-        let mut result = RoundResultBuilder::new(self.round_index, next_battle_phase);
-        let old_pruned_count = self.pruned_count();
-        let old_pruned_p = self.pruned_p();
+        let pruner = Pruner::new(self.prune_threshold);
+        let mut result = RoundResultBuilder::new(self.round_index, next_battle_phase, pruner);
         for combat in self.last_round.pending.outcomes() {
             let combat_result = self.combat_manager.resolve(combat);
-            result.add(combat_result, &mut self.pruner);
+            result.add(combat_result);
         }
 
-        let mut result = result.build(
-            self.pruned_count() - old_pruned_count,
-            self.pruned_p() - old_pruned_p,
-        );
+        let mut result = result.build();
         // We check if the current probability and the last probability are *exactly* the same;
         // if so, this may mean that we're reaching a stalemate: a point where neither side can
         // hit each other. If this happens 4 times in a row, we consider ourselves to be
@@ -98,16 +94,6 @@ where
 
     /// Sets the pruning threshold, where outcomes with a probability equal to or below are pruned.
     pub fn set_prune_threshold(&mut self, p: Probability) {
-        self.pruner.threshold = p;
-    }
-
-    /// Gets the number of outcomes pruned so far.
-    pub fn pruned_count(&self) -> usize {
-        self.pruner.count
-    }
-
-    /// Gets the cumulative probability pruned so far.
-    pub fn pruned_p(&self) -> Probability {
-        self.pruner.sum
+        self.prune_threshold = p;
     }
 }

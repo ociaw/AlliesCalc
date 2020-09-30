@@ -89,11 +89,12 @@ pub struct RoundResultBuilder<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub surviving_attackers: ProbDistBuilder<Force<TUnit>>,
     pub surviving_defenders: ProbDistBuilder<Force<TUnit>>,
     next_battle_phase: TBattlePhase,
+    pruner: Pruner,
 }
 
 impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TUnit> {
     // Constructs a new `RoundResultBuilder`.
-    pub fn new(round_index: usize, next_battle_phase: TBattlePhase) -> Self {
+    pub fn new(round_index: usize, next_battle_phase: TBattlePhase, pruner: Pruner) -> Self {
         RoundResultBuilder {
             index: round_index,
             pending: ProbDistBuilder::default(),
@@ -102,15 +103,12 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
             surviving_attackers: ProbDistBuilder::default(),
             surviving_defenders: ProbDistBuilder::default(),
             next_battle_phase,
+            pruner
         }
     }
 
     /// Consumes this builder and returns a new RoundResult.
-    pub fn build(
-        self,
-        pruned_count: usize,
-        pruned_p: Probability,
-    ) -> RoundResult<TBattlePhase, TUnit> {
+    pub fn build(self) -> RoundResult<TBattlePhase, TUnit> {
         let pending = self.pending.build();
         let completed = self.completed.build();
         let pruned = self.pruned.build();
@@ -129,14 +127,14 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
             surviving_attackers: self.surviving_attackers.build(),
             surviving_defenders: self.surviving_defenders.build(),
             total_probability,
-            pruned_count,
-            pruned_p,
+            pruned_count: self.pruner.count,
+            pruned_p: self.pruner.sum,
             stalemate: false,
         }
     }
 
     /// Adds the combat result to this RoundResult builder.
-    pub fn add(&mut self, combat_result: CombatResult<TBattlePhase, TUnit>, pruner: &mut Pruner) {
+    pub fn add(&mut self, combat_result: CombatResult<TBattlePhase, TUnit>) {
         let attackers = combat_result.surviving_attackers.outcomes();
         let defenders = combat_result.surviving_defenders.outcomes();
         for attacker in attackers {
@@ -149,7 +147,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
                 };
 
                 let combat = Prob { item: combat, p };
-                if pruner.prune(&combat) {
+                if self.pruner.prune(&combat) {
                     // Only track up to 100 pruned outcomes - otherwise they can get out of control.
                     if self.pruned.len() < 100 {
                         self.pruned.add_prob(combat);

@@ -128,7 +128,6 @@ impl BattleBuilder {
 pub struct Battle {
     round_manager: RoundManagerAA1942_2E,
     sequence: CombatSequenceAA1942_2E,
-    total_pruned_p: f64,
     summarizer: Summarizer<aa1942_2e::BattlePhase, Unit1942_2E>,
 }
 
@@ -143,7 +142,6 @@ impl Battle {
         Self {
             round_manager,
             sequence,
-            total_pruned_p: 0.0,
             summarizer,
         }
     }
@@ -194,13 +192,12 @@ impl Battle {
             defender_ipc_lost: summary.defender.ipc_lost.mean,
             attacker_ipc_stddev: summary.attacker.ipc.std_dev(),
             defender_ipc_stddev: summary.defender.ipc.std_dev(),
-            pruned_p: self.total_pruned_p,
+            pruned_p: summary.pruned_p.into(),
         }
     }
 
     pub fn advance_round(&mut self) {
         let round_manager = &mut self.round_manager;
-        self.total_pruned_p = round_manager.pruned_p().into();
         let round = round_manager.advance_round();
         self.summarizer.add_round(&round);
     }
