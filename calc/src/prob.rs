@@ -3,13 +3,18 @@ use core::{hash::Hash, ops::Mul};
 use fnv::FnvBuildHasher;
 use std::collections::HashMap;
 
+/// An item that has an associated `Probabilty` of occurrance.
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Prob<T> {
+    /// The inner item.
     pub item: T,
+    /// The probability of occurrance.
     pub p: Probability,
 }
 
 impl<T> Prob<T> {
+    /// Constructs a new `Prob` with item `item` and a probabilty of
+    /// `Probability`.
     pub fn new(item: T, p: Probability) -> Prob<T> {
         Prob { item, p }
     }
@@ -26,20 +31,24 @@ impl<T> Mul<Probability> for Prob<T> {
     }
 }
 
+/// A discrete probability distribution of `T`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProbDist<T> {
     outcomes: Vec<Prob<T>>,
 }
 
 impl<T> ProbDist<T> {
+    /// Returns a slice of `Prob<T>` representing this probability distribution.
     pub fn outcomes(&self) -> &[Prob<T>] {
         &self.outcomes
     }
 
+    /// The number of discrete items in this distribution.
     pub fn len(&self) -> usize {
         self.outcomes.len()
     }
 
+    /// Whether or not there are any items in this distribution.
     pub fn is_empty(&self) -> bool {
         self.outcomes.is_empty()
     }
@@ -63,24 +72,28 @@ impl<T> Default for ProbDist<T> {
     }
 }
 
+/// A builder to facilitate piecemeal construction of a `ProbDist`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProbDistBuilder<T: Eq + Hash> {
     outcomes: HashMap<T, Probability, FnvBuildHasher>,
 }
 
 impl<T: Eq + Hash> ProbDistBuilder<T> {
+    /// Constructs a new `ProbDistBuilder`.
     pub fn new() -> Self {
         Self {
             outcomes: HashMap::default(),
         }
     }
 
+    /// Constructs a new `ProbDistBuilder` with the given initial capacity.
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             outcomes: HashMap::with_capacity_and_hasher(capacity, Default::default()),
         }
     }
 
+    /// Consumes this builder and returns a `ProbDist`.
     pub fn build(self) -> ProbDist<T> {
         ProbDist {
             outcomes: self
@@ -91,16 +104,40 @@ impl<T: Eq + Hash> ProbDistBuilder<T> {
         }
     }
 
+    /// The number of discrete items in this builder.
     pub fn len(&self) -> usize {
         self.outcomes.len()
     }
 
+    /// Whether or not there are any items in this builder.
     pub fn is_empty(&self) -> bool {
         self.outcomes.is_empty()
+    }
+
+    /// Adds `item` to this distrbution with a probability of `p`.
+    pub fn add(&mut self, item: T, p: Probability) {
+        self.add_prob(Prob::new(item, p));
+    }
+
+    /// Adds the item in `prob` to this distrbution with the associated `Probability`.
+    pub fn add_prob(&mut self, prob: Prob<T>) {
+        if prob.p == Probability::zero() {
+            return;
+        }
+        match self.outcomes.entry(prob.item) {
+            std::collections::hash_map::Entry::Occupied(mut occupied) => {
+                *occupied.get_mut() += prob.p;
+            }
+            std::collections::hash_map::Entry::Vacant(vacant) => {
+                vacant.insert(prob.p);
+            }
+        }
     }
 }
 
 impl<T: Clone + Eq + Hash> ProbDistBuilder<T> {
+    /// Clones each item in this builder and returns a `ProbDist` with the
+    /// clones.
     pub fn build_cloned(&self) -> ProbDist<T> {
         ProbDist {
             outcomes: self
@@ -115,26 +152,6 @@ impl<T: Clone + Eq + Hash> ProbDistBuilder<T> {
 impl<T: Eq + Hash> Default for ProbDistBuilder<T> {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl<T: Eq + Hash> ProbDistBuilder<T> {
-    pub fn add(&mut self, item: T, p: Probability) {
-        self.add_prob(Prob::new(item, p));
-    }
-
-    pub fn add_prob(&mut self, prob: Prob<T>) {
-        if prob.p == Probability::zero() {
-            return;
-        }
-        match self.outcomes.entry(prob.item) {
-            std::collections::hash_map::Entry::Occupied(mut occupied) => {
-                *occupied.get_mut() += prob.p;
-            }
-            std::collections::hash_map::Entry::Vacant(vacant) => {
-                vacant.insert(prob.p);
-            }
-        }
     }
 }
 

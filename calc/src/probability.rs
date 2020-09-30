@@ -3,14 +3,19 @@ use core::fmt::Display;
 use core::iter::{Iterator, Sum};
 use core::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
+/// The probability of an event occurring. Guarnteed to lie within [0, 1].
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Probability {
     value: f64,
 }
 
+/// The tolerance for floating point errors when adding or subtracting.
 const TOLERANCE: f64 = 0.000000000001;
 
 impl Probability {
+    /// Construct a new `Probability` with a probability of `value`.
+    ///
+    /// Panics if `value` is less than 0.0 or greater than 1.0.
     pub fn new(value: f64) -> Self {
         use core::convert::TryInto;
         match value.try_into() {
@@ -19,6 +24,9 @@ impl Probability {
         }
     }
 
+    /// Construct a new `Probability` with a probability of `numer` / `denom`.
+    ///
+    /// Panics if `numer` is greater than `denom` or if `denom` is equal to 0.
     pub fn from_ratio(numer: u32, denom: u32) -> Self {
         if numer > denom {
             panic!(
@@ -34,10 +42,12 @@ impl Probability {
         }
     }
 
+    /// Returns a `Probability` with a value of `0`.
     pub const fn zero() -> Self {
         Self { value: 0.0 }
     }
 
+    /// Returns a `Probability` with a value of `1`.
     pub const fn one() -> Self {
         Self { value: 1.0 }
     }

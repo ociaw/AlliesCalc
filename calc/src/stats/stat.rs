@@ -5,13 +5,17 @@ use std::{
 
 use crate::*;
 
+/// A statistic measuring the mean and variance of some value.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Stat {
+    /// The mean of the value.
     pub mean: f64,
+    /// The variance of the value.
     pub variance: f64,
 }
 
 impl Stat {
+    /// Adds the value to the statistic, updating the mean and the variance.
     pub fn add_value<T: Into<f64>>(&mut self, value: T, p: Probability, total_p: Probability) {
         let value: f64 = value.into();
         let p: f64 = p.into();
@@ -22,6 +26,7 @@ impl Stat {
         self.variance += p * (value - old_mean) * (value - self.mean);
     }
 
+    /// Gets the standard deviation of the statistic.
     pub fn std_dev(&self) -> f64 {
         self.variance.sqrt()
     }

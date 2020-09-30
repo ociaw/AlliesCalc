@@ -3,6 +3,7 @@ use crate::{
     Unit,
 };
 
+/// An aggregate of all all the combat that occurred in a round.
 #[derive(Debug)]
 pub struct RoundResult<TCombatType: CombatType, TUnit: Unit> {
     pub index: usize,
@@ -35,6 +36,7 @@ impl<TCombatType: CombatType, TUnit: Unit> Default for RoundResult<TCombatType, 
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
+    /// Constructs a new `RoundResult` with the given battle phase, attackers, and defenders.
     pub fn new(
         combat_type: TCombatType,
         attackers: Force<TUnit>,
@@ -64,15 +66,19 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResult<TCombatType, TUnit> {
             ..Default::default()
         }
     }
+
+    /// Indicates whethes or not this round completes the battle.
     pub fn is_complete(&self) -> bool {
         self.pending.is_empty() || self.stalemate
     }
 
+    /// The probability that this round is reached in battle.
     pub fn total_probability(&self) -> Probability {
         self.total_probability
     }
 }
 
+/// A builder to incrementally construct a round result.
 #[derive(Debug)]
 pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
     // TODO: Why are these public?
@@ -85,6 +91,7 @@ pub struct RoundResultBuilder<TCombatType: CombatType, TUnit: Unit> {
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit> {
+    // Constructs a new `RoundResultBuilder`.
     pub fn new(round_index: usize) -> Self {
         RoundResultBuilder {
             index: round_index,
@@ -96,6 +103,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
         }
     }
 
+    /// Consumes this builder and returns a new RoundResult.
     pub fn build(
         self,
         pruned_count: usize,
@@ -125,6 +133,7 @@ impl<TCombatType: CombatType, TUnit: Unit> RoundResultBuilder<TCombatType, TUnit
         }
     }
 
+    /// Adds the combat result to this RoundResult builder.
     pub fn add(&mut self, combat_result: CombatResult<TCombatType, TUnit>, pruner: &mut Pruner) {
         let attackers = combat_result.surviving_attackers.outcomes();
         let defenders = combat_result.surviving_defenders.outcomes();

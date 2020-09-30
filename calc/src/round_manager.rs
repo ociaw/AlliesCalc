@@ -1,5 +1,6 @@
 use crate::*;
 
+/// Manages the rounds of the battle.
 pub struct RoundManager<
     TCombatType: CombatType,
     TUnit: Unit,
@@ -25,6 +26,8 @@ where
     TRollSelector: RollSelector<TCombatType, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
+    /// Constructs a new `RoundManager` with the given `CombatManager`, `CombatSequence`,
+    /// attacking force, and defending force.
     pub fn new(
         combat_manager: CombatManager<TCombatType, TUnit, THit, TRollSelector, TSurvivorSelector>,
         sequence: CombatSequence<TCombatType>,
@@ -44,6 +47,7 @@ where
         }
     }
 
+    /// Computes the next round of the battle and returns the result.
     #[allow(clippy::float_cmp)]
     pub fn advance_round(&mut self) -> &RoundResult<TCombatType, TUnit> {
         self.round_index += 1;
@@ -77,26 +81,32 @@ where
         &self.last_round
     }
 
+    /// Gets the current round index.
     pub fn round_index(&self) -> usize {
         self.round_index
     }
 
+    /// Gets the result of the last round that was computed.
     pub fn last_round(&self) -> &RoundResult<TCombatType, TUnit> {
         &self.last_round
     }
 
+    /// Indicates whether or not the battle is complete.
     pub fn is_complete(&self) -> bool {
         self.last_round.is_complete()
     }
 
+    /// Sets the pruning threshold, where outcomes with a probability equal to or below are pruned.
     pub fn set_prune_threshold(&mut self, p: Probability) {
         self.pruner.threshold = p;
     }
 
+    /// Gets the number of outcomes pruned so far.
     pub fn pruned_count(&self) -> usize {
         self.pruner.count
     }
 
+    /// Gets the cumulative probability pruned so far.
     pub fn pruned_p(&self) -> Probability {
         self.pruner.sum
     }

@@ -2,22 +2,35 @@ use super::*;
 use crate::*;
 use std::ops::Sub;
 
+/// A summary of an individual round.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSummary {
+    /// The index of this round.
     pub index: usize,
+    /// A summary of the attackers.
     pub attacker: RoundSideSummary,
+    /// A summary of the defenders.
     pub defender: RoundSideSummary,
+    /// The probability of a draw during this round.
     pub draw_p: Probability,
+    /// The total probability pruned during this round.
     pub pruned_p: Probability,
 }
 
+/// The delta of two round summaries.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundDelta {
+    /// The index of the subtrahend round.
     pub subtrahend_index: usize,
+    /// The index of the minuend round.
     pub minuend_index: usize,
+    /// The delta of the attacker summaries.
     pub attacker_delta: RoundSideDelta,
+    /// The delta of the defender summaries.
     pub defender_delta: RoundSideDelta,
+    /// The delta of the draw probability.
     pub draw_p: Probability,
+    /// The delta of the pruned probability.
     pub pruned_p: Probability,
 }
 
@@ -48,23 +61,34 @@ impl<TCombatType: CombatType, TUnit: Unit> From<&RoundResult<TCombatType, TUnit>
     }
 }
 
+/// The delta between two `RoundSideSummary`s.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSideDelta {
+    /// The remaining IPC delta.
     pub ipc: Stat,
+    /// The remaining unit count delta.
     pub unit_count: Stat,
+    /// The remaining strength delta.
     pub strength: Stat,
+    /// The win probability delta.
     pub win_p: Probability,
 }
 
+/// A summary of a specific side in a round.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSideSummary {
+    /// The sum of the remaining IPC of this side.
     pub ipc: Stat,
+    /// The number of remaining units of this side.
     pub unit_count: Stat,
+    /// The sum of the strength of this side.
     pub strength: Stat,
+    /// The probability of this side winning.
     pub win_p: Probability,
 }
 
 impl RoundSideSummary {
+    /// Constructs a new side summary for the given side from the round result.
     pub fn from_round_result<TCombatType: CombatType, TUnit: Unit>(
         result: &RoundResult<TCombatType, TUnit>,
         side: Side,

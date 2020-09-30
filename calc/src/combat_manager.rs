@@ -1,6 +1,7 @@
 use crate::*;
 use std::marker::PhantomData;
 
+/// Manages the resolution of individual combats.
 pub struct CombatManager<
     TCombatType: CombatType,
     TUnit: Unit,
@@ -26,6 +27,7 @@ where
     TRollSelector: RollSelector<TCombatType, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
+    /// Constructs a new combat manager with the given survivor selectors and roll selectors.
     pub fn new(
         attacker_survivor_selector: TSurvivorSelector,
         defender_survivor_selector: TSurvivorSelector,
@@ -42,6 +44,7 @@ where
         }
     }
 
+    /// Resolves a combat into a combat result.
     pub fn resolve(
         &mut self,
         combat: &Prob<Combat<TCombatType, TUnit>>,

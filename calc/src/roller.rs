@@ -3,11 +3,13 @@ use statrs::distribution::{Binomial, Discrete};
 use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
+/// Computes and caches rolls given a distribution of rolls.
 pub struct Roller<TUnit: Unit, THit: Hit<TUnit>> {
     cache: HashMap<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>,
 }
 
 impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
+    /// Expands the rolls into a probability distribution of all the hits that could occur and caches them.
     pub fn roll_hits(
         &mut self,
         strike: QuantDist<Roll<TUnit, THit>>,
@@ -24,11 +26,15 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Default for Roller<TUnit, THit> {
     }
 }
 
+/// Expands the rolls into a probability distribution of all the hits that could occur.
 pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
     strike: &QuantDist<Roll<TUnit, THit>>,
 ) -> ProbDist<QuantDist<THit>> {
     use std::convert::TryInto;
 
+    // This uses a fairly complex recursive algorithm exhaustively generate all possibilities.
+
+    // First we generate the probabilities for each the number of each hit.
     let mut hit_dists = HashMap::with_capacity(strike.outcomes().len());
     for quant in strike.outcomes() {
         let roll = quant.item;
@@ -55,6 +61,7 @@ pub fn roll_hits<TUnit: Unit, THit: Hit<TUnit>>(
         }
     }
 
+    // Recursively permutate the distributions of each different hit.
     let mut results = ProbDistBuilder::new();
     combine_hit_dists(
         &mut hit_dists.iter(),

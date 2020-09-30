@@ -1,6 +1,7 @@
 use super::*;
 use crate::*;
 
+/// Summarizes a battle.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Summarizer<TCombatType: CombatType, TUnit: Unit> {
     prebattle: RoundSummary,
@@ -14,6 +15,7 @@ pub struct Summarizer<TCombatType: CombatType, TUnit: Unit> {
 }
 
 impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
+    /// Creates a new battle summary.
     pub fn new(prebattle: &RoundResult<TCombatType, TUnit>) -> Self {
         Self {
             prebattle: prebattle.into(),
@@ -27,18 +29,22 @@ impl<TCombatType: CombatType, TUnit: Unit> Summarizer<TCombatType, TUnit> {
         }
     }
 
+    /// Gets the number of rounds that took place in the battle.
     pub fn round_count(&self) -> usize {
         self.round_summaries.len()
     }
 
+    /// Gets the summary for the prebattle round.
     pub fn prebattle(&self) -> &RoundSummary {
         &self.prebattle
     }
 
+    /// Gets the summary for the last round in the battle, or None if there weren't any rounds.
     pub fn last_round(&self) -> Option<&RoundSummary> {
         self.round_summaries.last()
     }
 
+    /// Consumes this summarizer and constructs a new `BattleSummary`.
     pub fn summarize(self) -> BattleSummary<TCombatType, TUnit> {
         BattleSummary {
             prebattle: self.prebattle,
