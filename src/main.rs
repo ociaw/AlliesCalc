@@ -48,15 +48,15 @@ fn main() {
             sequence.combat_at(round_index)
         );
         let last_round = round_manager.advance_round();
-        summarizer.add_round(last_round);
+        let summary = summarizer.add_round(last_round);
 
         println!("Attacker Stats:");
-        print_round_side_summary(&summarizer.last_round().unwrap().attacker);
+        print_round_side_summary(&summary.attacker);
         println!("Defender Stats:");
-        print_round_side_summary(&summarizer.last_round().unwrap().defender);
+        print_round_side_summary(&summary.defender);
 
         println!(
-            "Pending: {}, Completed: {}, ∑P: {:>9.6}",
+            " Pending: {}, Completed: {}, ∑P: {:>9.6}",
             last_round.pending.len(),
             last_round.completed.len(),
             last_round.total_probability()
@@ -76,7 +76,7 @@ fn main() {
     let summary = summarizer.summarize();
 
     println!(
-        "{} rounds and {} outcomes analyzed, {:.2}% of outcomes discarded",
+        "{} rounds and {} unique outcomes analyzed, {:.2}% of outcomes discarded",
         summary.round_count(),
         summary.completed_combats.len(),
         summary.pruned_p * 100.0

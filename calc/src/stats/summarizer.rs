@@ -58,10 +58,11 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> Summarizer<TBattlePhase, TUnit> {
         }
     }
 
-    pub fn add_round(&mut self, round: &RoundResult<TBattlePhase, TUnit>) {
+    pub fn add_round(&mut self, round: &RoundResult<TBattlePhase, TUnit>) -> &RoundSummary {
         self.round_summaries.push(round.into());
         self.accumulate_completed(&round.completed);
         self.pruned_p += round.pruned_p;
+        self.round_summaries.last().unwrap()
     }
 
     fn accumulate_completed(&mut self, combat: &ProbDist<Combat<TBattlePhase, TUnit>>) {
