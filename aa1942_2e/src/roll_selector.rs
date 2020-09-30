@@ -5,7 +5,7 @@ pub struct RollSelector;
 
 #[derive(Debug)]
 struct Context {
-    pub combat: BattlePhase,
+    pub phase: BattlePhase,
     pub side: Side,
     pub boost_count: u32,
     pub hostile_air_count: u32,
@@ -16,7 +16,7 @@ struct Context {
 impl Context {
     fn convert(combat_context: &calc::CombatContext<BattlePhase, Unit>) -> Context {
         Context {
-            combat: combat_context.battle_phase,
+            phase: combat_context.combat.battle_phase,
             side: combat_context.side,
             boost_count: combat_context
                 .friendlies()
@@ -55,7 +55,7 @@ impl calc::RollSelector<BattlePhase, Unit, Hit> for RollSelector {
 
         let force = context.friendlies();
         let context = Context::convert(context);
-        let current_combat = context.combat;
+        let current_combat = context.phase;
         let mut rolls = QuantDistBuilder::with_capacity(force.outcomes().len());
         for quant in force.outcomes() {
             let unit = quant.item;

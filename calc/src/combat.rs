@@ -118,54 +118,45 @@ where
 
 /// Context of a combat used for selecting rolls.
 #[derive(Debug)]
-pub struct CombatContext<TBattlePhase, TUnit>
+pub struct CombatContext<'a, TBattlePhase, TUnit>
 where
     TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
-    /// The phase of battle.
-    pub battle_phase: TBattlePhase,
-    /// The attacking force.
-    pub attackers: Force<TUnit>,
-    /// The defending force.
-    pub defenders: Force<TUnit>,
+    /// The underlying combat.
+    pub combat: &'a Combat<TBattlePhase, TUnit>,
     /// The side this context represents.
     pub side: Side,
 }
 
-impl<TBattlePhase, TUnit> CombatContext<TBattlePhase, TUnit>
+impl<'a, TBattlePhase, TUnit> CombatContext<'a, TBattlePhase, TUnit>
 where
     TBattlePhase: BattlePhase,
     TUnit: Unit,
 {
     /// Constructs a new context from a `Combat` and the `Side` of the force.
-    pub fn from_combat(combat: &Combat<TBattlePhase, TUnit>, side: Side) -> Self {
-        Self {
-            battle_phase: combat.battle_phase,
-            attackers: combat.attackers.clone(),
-            defenders: combat.defenders.clone(),
-            side,
-        }
+    pub fn from_combat(combat: &'a Combat<TBattlePhase, TUnit>, side: Side) -> Self {
+        Self { combat, side }
     }
 
     /// Returns the friendly force.
     pub fn friendlies(&self) -> &QuantDist<TUnit> {
         match self.side {
-            Side::Attacker => &self.attackers,
-            Side::Defender => &self.defenders,
+            Side::Attacker => &self.combat.attackers,
+            Side::Defender => &self.combat.defenders,
         }
     }
 
     /// Returns the hostile force.
     pub fn hostiles(&self) -> &QuantDist<TUnit> {
         match self.side {
-            Side::Attacker => &self.defenders,
-            Side::Defender => &self.attackers,
+            Side::Attacker => &self.combat.defenders,
+            Side::Defender => &self.combat.attackers,
         }
     }
 }
 
-///
+/// The result of a combat.
 #[derive(Debug)]
 pub struct CombatResult<TBattlePhase, TUnit>
 where
