@@ -1,5 +1,6 @@
 pub mod stats;
 
+mod battle_phase;
 mod combat;
 mod combat_manager;
 mod hit;
@@ -14,18 +15,26 @@ mod round_result;
 mod survivor_selector;
 mod unit;
 
-pub use combat::{BattlePhase, Combat, CombatContext, CombatResult, PhaseSequence, Side};
+pub use battle_phase::*;
+pub use combat::*;
 pub use combat_manager::CombatManager;
 pub use hit::Hit;
-pub use prob::{Prob, ProbDist, ProbDistBuilder};
+pub use prob::*;
 pub use probability::Probability;
 pub use pruner::Pruner;
-pub use quant::{Quant, QuantDist, QuantDistBuilder};
-pub use roll::{Roll, RollSelector};
+pub use quant::*;
+pub use roll::*;
 pub use roller::Roller;
 pub use round_manager::RoundManager;
-pub use round_result::{RoundResult, RoundResultBuilder};
+pub use round_result::*;
 pub use survivor_selector::SurvivorSelector;
-pub use unit::{Force, Unit};
+pub use unit::*;
 
 pub use roller::roll_hits;
+
+/// The side of combat - attacker or defender.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub enum Side {
+    Attacker,
+    Defender,
+}
