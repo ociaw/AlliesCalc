@@ -36,9 +36,12 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> Default for RoundResult<TBattlePhas
 }
 
 impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResult<TBattlePhase, TUnit> {
-    /// Constructs a new `RoundResult` with the given battle phase, attackers, and defenders.
-    pub fn new(
-        battle_phase: TBattlePhase,
+    /// Constructs a new initial `RoundResult` with the first battle phase, attackers, and defenders.
+    ///
+    /// This creates a round result representing the result of the pre-battle round. It contains one
+    /// pending combat, which is constructed from the `attackers` and `defenders` arguments.
+    pub fn new_initial(
+        first_phase: TBattlePhase,
         attackers: Force<TUnit>,
         defenders: Force<TUnit>,
     ) -> RoundResult<TBattlePhase, TUnit> {
@@ -47,7 +50,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResult<TBattlePhase, TUnit> {
                 item: Combat {
                     attackers: attackers.clone(),
                     defenders: defenders.clone(),
-                    battle_phase: battle_phase,
+                    battle_phase: first_phase,
                 },
                 p: Probability::one(),
             }]

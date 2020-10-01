@@ -35,13 +35,13 @@ where
         defenders: Force<TUnit>,
     ) -> Self {
         let round_index = 0;
-        let battle_phase = sequence.combat_at(round_index + 1);
+        let first_phase = sequence.combat_at(round_index + 1);
         RoundManager {
             combat_manager,
             sequence,
             prune_threshold: Default::default(),
             round_index,
-            last_round: RoundResult::new(battle_phase, attackers, defenders),
+            last_round: RoundResult::new_initial(first_phase, attackers, defenders),
             last_probability: Probability::zero(),
             probability_run_count: 0,
         }
