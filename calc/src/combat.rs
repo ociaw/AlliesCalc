@@ -32,20 +32,20 @@ pub trait BattlePhase: Debug + Clone + Copy + Eq + Ord + Hash + Sized {
 /// And so on. If `start` is empty, the sequence will proceed directly to `cycle`. `cycle`
 /// must contain at least one battle phase.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CombatSequence<TBattlePhase: BattlePhase> {
+pub struct PhaseSequence<TBattlePhase: BattlePhase> {
     start: Vec<TBattlePhase>,
     cycle: Vec<TBattlePhase>,
 }
 
-impl<TBattlePhase: BattlePhase> CombatSequence<TBattlePhase> {
-    /// Constructs a new `CombatSequence` with the the given `start` and `cycle`. `cycle` must not
+impl<TBattlePhase: BattlePhase> PhaseSequence<TBattlePhase> {
+    /// Constructs a new `PhaseSequence` with the the given `start` and `cycle`. `cycle` must not
     /// be empty.
-    pub fn new(start: Vec<TBattlePhase>, cycle: Vec<TBattlePhase>) -> CombatSequence<TBattlePhase> {
+    pub fn new(start: Vec<TBattlePhase>, cycle: Vec<TBattlePhase>) -> PhaseSequence<TBattlePhase> {
         if cycle.is_empty() {
             panic!("Cycle must not be empty.");
         }
 
-        CombatSequence { start, cycle }
+        PhaseSequence { start, cycle }
     }
 
     /// Returns a slice of the starting combat sequence.

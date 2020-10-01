@@ -9,7 +9,7 @@ pub struct RoundManager<
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 > {
     combat_manager: CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>,
-    sequence: CombatSequence<TBattlePhase>,
+    sequence: PhaseSequence<TBattlePhase>,
     prune_threshold: Probability,
     round_index: usize,
     last_round: RoundResult<TBattlePhase, TUnit>,
@@ -26,11 +26,11 @@ where
     TRollSelector: RollSelector<TBattlePhase, TUnit, THit>,
     TSurvivorSelector: SurvivorSelector<TUnit, THit>,
 {
-    /// Constructs a new `RoundManager` with the given `CombatManager`, `CombatSequence`,
+    /// Constructs a new `RoundManager` with the given `CombatManager`, `PhaseSequence`,
     /// attacking force, and defending force.
     pub fn new(
         combat_manager: CombatManager<TBattlePhase, TUnit, THit, TRollSelector, TSurvivorSelector>,
-        sequence: CombatSequence<TBattlePhase>,
+        sequence: PhaseSequence<TBattlePhase>,
         attackers: Force<TUnit>,
         defenders: Force<TUnit>,
     ) -> Self {

@@ -21,7 +21,7 @@ type RoundManagerAA1942_2E = calc::RoundManager<
     aa1942_2e::RollSelector,
     aa1942_2e::SurvivorSelector,
 >;
-type CombatSequenceAA1942_2E = calc::CombatSequence<aa1942_2e::BattlePhase>;
+type PhaseSequenceAA1942_2E = calc::PhaseSequence<aa1942_2e::BattlePhase>;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -127,7 +127,7 @@ impl BattleBuilder {
 #[wasm_bindgen]
 pub struct Battle {
     round_manager: RoundManagerAA1942_2E,
-    sequence: CombatSequenceAA1942_2E,
+    sequence: PhaseSequenceAA1942_2E,
     summarizer: Summarizer<aa1942_2e::BattlePhase, Unit1942_2E>,
 }
 

@@ -1,5 +1,5 @@
 use crate::*;
-use calc::{CombatSequence, Force};
+use calc::{PhaseSequence, Force};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum BattlePhase {
@@ -14,7 +14,7 @@ impl BattlePhase {
     pub fn create_sequence(
         attackers: &Force<Unit>,
         defenders: &Force<Unit>,
-    ) -> CombatSequence<BattlePhase> {
+    ) -> PhaseSequence<BattlePhase> {
         let mut start = Vec::new();
 
         let units = attackers
@@ -46,7 +46,7 @@ impl BattlePhase {
         }
         cycle.push(BattlePhase::General);
 
-        CombatSequence::new(start, cycle)
+        PhaseSequence::new(start, cycle)
     }
 }
 
