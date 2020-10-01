@@ -4,6 +4,7 @@ use crate::{
 };
 
 /// An aggregate of all all the combat that occurred in a round.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug)]
 pub struct RoundResult<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub index: usize,

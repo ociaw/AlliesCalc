@@ -30,6 +30,7 @@ pub trait BattlePhase: Debug + Clone + Copy + Eq + Ord + Hash + Sized {
 ///
 /// And so on. If `start` is empty, the sequence will proceed directly to `cycle`. `cycle`
 /// must contain at least one battle phase.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PhaseSequence<TBattlePhase: BattlePhase> {
     start: Vec<TBattlePhase>,

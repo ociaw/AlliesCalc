@@ -2,6 +2,7 @@ use super::*;
 use crate::*;
 
 /// A summary of an entire battle.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct BattleSummary<TBattlePhase: BattlePhase, TUnit: Unit> {
     pub prebattle: RoundSummary,
@@ -32,6 +33,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> BattleSummary<TBattlePhase, TUnit> 
 }
 
 /// A summary of a side in a battle.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BattleSideSummary {
     pub ipc: Stat,

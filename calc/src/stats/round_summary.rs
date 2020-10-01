@@ -3,6 +3,7 @@ use crate::*;
 use std::ops::Sub;
 
 /// A summary of an individual round.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSummary {
     /// The index of this round.
@@ -18,6 +19,7 @@ pub struct RoundSummary {
 }
 
 /// The delta of two round summaries.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundDelta {
     /// The index of the subtrahend round.
@@ -64,6 +66,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> From<&RoundResult<TBattlePhase, TUn
 }
 
 /// The delta between two `RoundSideSummary`s.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSideDelta {
     /// The remaining IPC delta.
@@ -77,6 +80,7 @@ pub struct RoundSideDelta {
 }
 
 /// A summary of a specific side in a round.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RoundSideSummary {
     /// The sum of the remaining IPC of this side.

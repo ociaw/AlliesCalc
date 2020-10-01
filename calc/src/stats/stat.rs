@@ -6,6 +6,7 @@ use std::{
 use crate::*;
 
 /// A statistic measuring the mean and variance of some value.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Stat {
     /// The mean of the value.

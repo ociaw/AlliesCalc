@@ -3,6 +3,11 @@ name = "calc"
 version = "0.1.0"
 edition = "2018"
 
+[features]
+serde1 = ["serde"]
+
 [dependencies]
 statrs = "0.13.0"
 fnv = "1.0.3"
+
+serde = { version = "1.0", features = ["derive", "rc"], optional = true }

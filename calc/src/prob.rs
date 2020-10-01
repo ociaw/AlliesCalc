@@ -4,6 +4,7 @@ use fnv::FnvBuildHasher;
 use std::collections::HashMap;
 
 /// An item that has an associated `Probabilty` of occurrance.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Prob<T> {
     /// The inner item.
@@ -32,6 +33,7 @@ impl<T> Mul<Probability> for Prob<T> {
 }
 
 /// A discrete probability distribution of `T`.
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProbDist<T> {
     outcomes: Vec<Prob<T>>,

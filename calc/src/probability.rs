@@ -4,6 +4,7 @@ use core::iter::{Iterator, Sum};
 use core::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 /// The probability of an event occurring. Guarnteed to lie within [0, 1].
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Probability {
     value: f64,

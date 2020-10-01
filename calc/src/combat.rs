@@ -3,6 +3,7 @@ use std::{fmt::Debug, hash::Hash};
 
 /// A combat occurring as a specific battle phase with the given forces attacking and defending.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 pub struct Combat<TBattlePhase, TUnit>
 where
     TBattlePhase: BattlePhase,
