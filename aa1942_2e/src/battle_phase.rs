@@ -1,5 +1,5 @@
 use crate::*;
-use calc::{PhaseSequence, Force};
+use calc::{Force, PhaseSequence};
 
 #[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]

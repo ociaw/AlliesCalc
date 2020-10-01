@@ -18,9 +18,7 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
                 let value = roll_hits(vacant.key());
                 vacant.insert(value)
             }
-            Entry::Occupied(occupied) => {
-                occupied.into_mut()
-            }
+            Entry::Occupied(occupied) => occupied.into_mut(),
         }
     }
 }
@@ -28,7 +26,7 @@ impl<TUnit: Unit, THit: Hit<TUnit>> Roller<TUnit, THit> {
 impl<TUnit: Unit, THit: Hit<TUnit>> Default for Roller<TUnit, THit> {
     fn default() -> Self {
         Self {
-            cache: HashMap::<QuantDist<Roll<TUnit, THit>>, ProbDist<QuantDist<THit>>>::new(),
+            cache: HashMap::new(),
         }
     }
 }

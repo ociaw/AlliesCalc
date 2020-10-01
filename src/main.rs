@@ -47,7 +47,18 @@ fn main() {
             round_index,
             sequence.combat_at(round_index)
         );
-        let last_round = round_manager.advance_round();
+
+        const PROCESS_LIMIT: usize = 5000;
+        let mut processor = round_manager.round_processor();
+
+        while !processor.process(PROCESS_LIMIT) {
+            println!(
+                " {:5.2}% complete",
+                processor.processed_outcomes() as f64 / processor.total_outcomes() as f64 * 100.0
+            );
+        }
+
+        let last_round = processor.finish();
         let summary = summarizer.add_round(last_round);
 
         println!("Attacker Stats:");

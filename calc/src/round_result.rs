@@ -106,7 +106,7 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResultBuilder<TBattlePhase, TU
             surviving_attackers: ProbDistBuilder::default(),
             surviving_defenders: ProbDistBuilder::default(),
             next_battle_phase,
-            pruner
+            pruner,
         }
     }
 

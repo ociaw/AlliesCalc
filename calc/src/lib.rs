@@ -25,7 +25,7 @@ pub use pruner::Pruner;
 pub use quant::*;
 pub use roll::*;
 pub use roller::Roller;
-pub use round_manager::RoundManager;
+pub use round_manager::*;
 pub use round_result::*;
 pub use survivor_selector::SurvivorSelector;
 pub use unit::*;
