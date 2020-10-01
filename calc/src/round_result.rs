@@ -84,13 +84,12 @@ impl<TBattlePhase: BattlePhase, TUnit: Unit> RoundResult<TBattlePhase, TUnit> {
 /// A builder to incrementally construct a round result.
 #[derive(Debug)]
 pub struct RoundResultBuilder<TBattlePhase: BattlePhase, TUnit: Unit> {
-    // TODO: Why are these public?
-    pub index: usize,
-    pub pending: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
-    pub completed: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
-    pub pruned: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
-    pub surviving_attackers: ProbDistBuilder<Force<TUnit>>,
-    pub surviving_defenders: ProbDistBuilder<Force<TUnit>>,
+    index: usize,
+    pending: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
+    completed: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
+    pruned: ProbDistBuilder<Combat<TBattlePhase, TUnit>>,
+    surviving_attackers: ProbDistBuilder<Force<TUnit>>,
+    surviving_defenders: ProbDistBuilder<Force<TUnit>>,
     next_battle_phase: TBattlePhase,
     pruner: Pruner,
 }
