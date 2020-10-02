@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs'
-import { Battle, CumulativeStats, RoundStats, Ruleset } from "allies-calc-rs";
+import { Battle, CumulativeStats, RoundStats, RoundSummary, Ruleset } from "allies-calc-rs";
 import { Unit } from './model/unit';
 
 @Injectable({
@@ -9,6 +9,7 @@ import { Unit } from './model/unit';
 export class CalcService {
   private inited = false;
   private battle!: Battle;
+  private roundSummariesSubject = new Subject<RoundSummary[]>();
   private roundStatsSubject = new Subject<RoundStats>();
   private cumulativeStatsSubject = new Subject<CumulativeStats>();
   private availableUnitsSubject = new Subject<Unit[]>();
@@ -29,6 +30,7 @@ export class CalcService {
       this.availableUnitsSubject.next(units);
 
       this.battle = wasm.Battle.default();
+      this.roundSummariesSubject.next(this.battle.roundSummaries());
       this.roundStatsSubject.next(this.battle.roundStats());
       this.cumulativeStatsSubject.next(this.battle.cumulativeStats());
     });
@@ -44,6 +46,7 @@ export class CalcService {
         builder.addDefender(tuple[0].id, tuple[1])
       }
       this.battle = builder.build();
+      this.roundSummariesSubject.next(this.battle.roundSummaries());
       this.roundStatsSubject.next(this.battle.roundStats());
       this.cumulativeStatsSubject.next(this.battle.cumulativeStats());
     });
@@ -57,8 +60,16 @@ export class CalcService {
       return;
     }
     this.battle.advance_round();
+    this.roundSummariesSubject.next(this.battle.roundSummaries());
     this.roundStatsSubject.next(this.battle.roundStats());
     this.cumulativeStatsSubject.next(this.battle.cumulativeStats());
+  }
+
+  /**
+   * roundSummaries
+   */
+  public roundSummaries(): Observable<RoundSummary[]> {
+    return this.roundSummariesSubject.asObservable();
   }
 
   /**

@@ -11,7 +11,6 @@
   },
   "private": true,
   "dependencies": {
-    "allies-calc-rs": "file:../wasm/pkg",
     "@angular/animations": "~10.1.1",
     "@angular/common": "~10.1.1",
     "@angular/compiler": "~10.1.1",
@@ -20,6 +19,9 @@
     "@angular/platform-browser": "~10.1.1",
     "@angular/platform-browser-dynamic": "~10.1.1",
     "@angular/router": "~10.1.1",
+    "allies-calc-rs": "file:../wasm/pkg",
+    "apexcharts": "^3.21.0",
+    "ng-apexcharts": "^1.5.4",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

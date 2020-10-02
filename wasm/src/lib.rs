@@ -13,6 +13,35 @@ pub fn set_panic_hook() {
     utils::set_panic_hook();
 }
 
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_CONTENT: &'static str = r#"
+
+export interface Probability {
+    value: number;
+}
+
+export interface Stat {
+    mean: number;
+    variance: number;
+}
+
+export interface RoundSideSummary {
+    ipc: Stat;
+    unit_count: Stat;
+    strength: Stat;
+    win_p: Probability;
+}
+
+export interface RoundSummary {
+    index: number;
+    attacker: RoundSideSummary;
+    defender: RoundSideSummary;
+    draw_p: Probability;
+    pruned_p: Probability;
+}
+
+"#;
+
 type Unit1942_2E = aa1942_2e::Unit;
 type RoundManagerAA1942_2E = calc::RoundManager<
     aa1942_2e::BattlePhase,
@@ -162,6 +191,14 @@ impl Battle {
             "{}",
             self.sequence.combat_at(self.round_manager.round_index())
         )
+    }
+
+    #[wasm_bindgen(js_name = roundSummaries)]
+    pub fn round_summaries(&self) -> JsValue {
+        let summary = self.summarizer.clone().summarize();
+        let mut summaries = summary.round_summaries;
+        summaries.insert(0, summary.prebattle);
+        JsValue::from_serde(&summaries).unwrap_throw()
     }
 
     #[wasm_bindgen(js_name = roundStats)]

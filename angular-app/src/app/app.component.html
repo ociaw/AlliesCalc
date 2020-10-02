@@ -16,6 +16,30 @@
   <div><button on-click="nextRound()">Next Round</button></div>
 </section>
 <section>
+  <h3>Round {{ (roundSummaries | async)?.length }}</h3>
+  <app-round-chart #roundChart></app-round-chart>
+  <table>
+    <thead>
+      <tr>
+        <th>Round</th>
+        <th>Atk. IPC</th>
+        <th>Def. IPC</th>
+        <th>Draw Prob.</th>
+        <th>Pruned Prob.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let summary of roundSummaries | async">
+        <td>{{ summary.index }}</td>
+        <td>{{ summary.attacker.ipc.mean | number:'1.2-2' }}</td>
+        <td>{{ summary.defender.ipc.mean | number:'1.2-2' }}</td>
+        <td>{{ summary.draw_p.value | percent }}</td>
+        <td>{{ summary.pruned_p.value | percent }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section>
   <h3>Cumulative Results</h3>
   <table>
     <thead>
