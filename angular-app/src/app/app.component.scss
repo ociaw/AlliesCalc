@@ -20,9 +20,9 @@
 
 table {
     width: 100%;
-    max-width: 32em;
     border: 4px double #4e8789;
     border-collapse: collapse;
+    background-color: aliceblue;
 }
 
 thead {
@@ -35,7 +35,6 @@ thead {
 }
 
 tr {
-    background-color: aliceblue;
 
     &:nth-child(2n) {
         background-color: #EEE;
@@ -50,4 +49,8 @@ td, th {
     &.numeric {
         text-align: right;
     }
+}
+
+.cumulative-results {
+    max-width: 32em;
 }

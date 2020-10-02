@@ -48,7 +48,7 @@ export class RoundChartComponent implements OnInit {
 
   @Input() set summaries(value: RoundSummary[]) {
     this._summaries = value;
-    let categories = value.map(summary => "Round " + summary.index);
+    let categories = value.map(summary => summary.index == 0 ? "Pre-battle" : "Round " + summary.index);
     let attackerIpcSeries = value.map(summary => summary.attacker.ipc.mean);
     let defenderIpcSeries = value.map(summary => summary.defender.ipc.mean);
 
@@ -65,7 +65,5 @@ export class RoundChartComponent implements OnInit {
         color: "#088",
       }
     ];
-
-    console.log("updated");
   }
 }
