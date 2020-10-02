@@ -26,6 +26,8 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
+            "showCircularDependencies": false,
+            "allowedCommonJsDependencies": ["apexcharts"],
             "assets": [
               "src/favicon.ico",
               "src/assets"
