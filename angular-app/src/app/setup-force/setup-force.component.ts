@@ -7,7 +7,6 @@ let nextId = 0;
 @Component({
   selector: 'app-setup-force',
   templateUrl: './setup-force.component.html',
-  styleUrls: ['./setup-force.component.scss']
 })
 export class SetupForceComponent {
   private _units: Unit[] = [];

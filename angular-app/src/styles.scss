@@ -12,3 +12,114 @@ app-root {
     max-width: 64rem;
     margin: 0 auto;
 }
+
+/* App styling */
+#setup {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    h3 {
+        width: 100%;
+    }
+
+    app-setup-force {
+        flex: 1;
+    }
+
+    .actions {
+        width: 100%;
+    }
+}
+
+table {
+    width: 100%;
+    border: 4px double #4e8789;
+    border-collapse: collapse;
+    background-color: aliceblue;
+}
+
+thead {
+    color: black;
+    border-bottom: 1px solid #9FBFC4;
+    background-color: #9FBFC4;
+    th {
+        font-weight: normal;
+    }
+}
+
+tr {
+
+    &:nth-child(2n) {
+        background-color: #EEE;
+    }
+}
+
+th:first-of-type {
+    text-align: right;
+}
+
+td, th {
+    &.numeric {
+        text-align: right;
+    }
+}
+
+.cumulative-results {
+    max-width: 32em;
+}
+
+/* Setup Force styling */
+.loss-order {
+    display: flex;
+    margin: 0 -.25em;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    h4 {
+        width: 100%;
+        margin: .25em;
+    }
+
+    input {
+        display: none;
+
+        + label {
+            margin: .25em;
+            padding: .5em;
+            border: 1px solid #9FBFC4;
+            border-radius: 1em;
+            background-color: aliceblue;
+            user-select: none;
+
+            &:hover {
+                border-color: #4e8789;
+            }
+        }
+
+        &:checked + label {
+            border-color: #4e8789;
+            background-color: #4e8789;
+            color: white;
+        }
+    }
+}
+
+.force-editor .unit {
+    display: flex;
+    label {
+        flex: 2;
+    }
+    input {
+        flex: 1;
+        min-width: 5ch;
+        text-align: right;
+    }
+}
+
+
+/* Round Chart styling */
+apx-chart {
+    display: block;
+    height: 350px;
+}

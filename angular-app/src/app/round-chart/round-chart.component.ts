@@ -14,7 +14,6 @@ import {
 @Component({
   selector: 'app-round-chart',
   templateUrl: './round-chart.component.html',
-  styleUrls: ['./round-chart.component.scss']
 })
 export class RoundChartComponent implements OnInit {
   private _summaries: RoundSummary[] = [];
