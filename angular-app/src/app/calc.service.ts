@@ -59,7 +59,11 @@ export class CalcService {
     if (!this.inited || this.battle.isComplete()) {
       return;
     }
+
+    let start = window.performance.now();
     this.battle.advance_round();
+    let end = window.performance.now();
+    console.log("Round " + this.battle.roundIndex() + " took " + (end - start) + " ms.");
     this.roundSummariesSubject.next(this.battle.roundSummaries());
     this.roundStatsSubject.next(this.battle.roundStats());
     this.cumulativeStatsSubject.next(this.battle.cumulativeStats());
