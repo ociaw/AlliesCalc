@@ -246,30 +246,8 @@ impl Battle {
 
 impl Default for Battle {
     fn default() -> Self {
-        use calc::Quant;
-        let attackers = Force::new(
-            vec![
-                Quant::new(Unit1942_2E::Infantry, 40),
-                Quant::new(Unit1942_2E::Artillery, 40),
-                Quant::new(Unit1942_2E::Tank, 40),
-                Quant::new(Unit1942_2E::Fighter, 40),
-                Quant::new(Unit1942_2E::Bomber, 40),
-                Quant::new(Unit1942_2E::BombardingCruiser, 40),
-                Quant::new(Unit1942_2E::BombardingBattleship, 40),
-            ]
-            .into(),
-        );
-        let defenders = Force::new(
-            vec![
-                Quant::new(Unit1942_2E::Infantry, 55),
-                Quant::new(Unit1942_2E::Artillery, 40),
-                Quant::new(Unit1942_2E::Tank, 40),
-                Quant::new(Unit1942_2E::Fighter, 40),
-                Quant::new(Unit1942_2E::Bomber, 40),
-                Quant::new(Unit1942_2E::AntiAir, 40),
-            ]
-            .into(),
-        );
+        let attackers = Force::new(vec![].into());
+        let defenders = Force::new(vec![].into());
         Self::new(attackers, defenders)
     }
 }
