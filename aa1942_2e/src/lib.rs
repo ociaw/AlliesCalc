@@ -45,9 +45,14 @@ pub fn create_round_manager(
 mod tests {
     use super::*;
     use float_cmp::*;
+    use fixed::types::U1F63;
+    const EPSILON: U1F63 = U1F63::from_bits(1);
 
     fn assert_prob_eq(first: Probability, second: Probability, ulps: i64) -> bool {
-        approx_eq!(f64, first.into(), second.into(), ulps = ulps)
+        let diff: U1F63 = if first > second { first - second } else { second - first }.into();
+        let tolerance = EPSILON * ulps as u64;
+        diff <= tolerance
+        //approx_eq!(f64, first.into(), second.into(), ulps = ulps)
     }
 
     #[test]
@@ -68,12 +73,12 @@ mod tests {
         assert!(assert_prob_eq(
             summary.defender.win_p,
             Probability::from_ratio(1, 3),
-            1
-        ));
+            0
+        ), "expected: {}, actual: {}, diff: {}, eps: {}", Probability::from_ratio(1, 3), summary.defender.win_p, summary.defender.win_p - Probability::from_ratio(1, 3), EPSILON);
         assert!(assert_prob_eq(
             summary.draw_p,
             Probability::from_ratio(2, 3),
-            1
+            2
         ));
 
         assert_eq!(summary.total_p, Probability::one());
@@ -224,13 +229,13 @@ mod tests {
             summary.defender.win_p,
             Probability::from_ratio(834, 1679),
             2
-        ));
+        ),  "{} - {}", summary.defender.win_p, Probability::from_ratio(834, 1679));
         assert_eq!(summary.draw_p, Probability::zero());
         assert!(assert_prob_eq(
             last_round.total_probability(),
             Probability::from_ratio(845, 1679),
             2
-        ));
+        ), "{} - {}", last_round.total_probability(), Probability::from_ratio(845, 1679));
         assert!(round_manager.last_round().stalemate);
     }
 

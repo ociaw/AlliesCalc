@@ -90,19 +90,19 @@ fn main() {
         "{} rounds and {} unique outcomes analyzed, {:.2}% of outcomes discarded",
         summary.round_count(),
         summary.completed_combats.len(),
-        summary.pruned_p * 100.0
+        f64::from(summary.pruned_p) * 100.0
     );
     println!("Winner      Prob.");
-    println!("Attack:    {:>5.2}%", summary.attacker.win_p * 100.0);
-    println!("Defend:    {:>5.2}%", summary.defender.win_p * 100.0);
-    println!("Draw:      {:>5.2}%", summary.draw_p * 100.0);
+    println!("Attack:    {:>5.2}%", f64::from(summary.attacker.win_p) * 100.0);
+    println!("Defend:    {:>5.2}%", f64::from(summary.defender.win_p) * 100.0);
+    println!("Draw:      {:>5.2}%", f64::from(summary.draw_p) * 100.0);
     if round_manager.last_round().stalemate {
         println!(
             "Stalemate: {:>5.2}%",
             round_manager.last_round().total_probability() * 100.0
         );
     }
-    println!("Total:     {:>8.5}%", summary.total_p * 100.0);
+    println!("Total:     {:>8.5}%", f64::from(summary.total_p) * 100.0);
 
     println!(
         "Attacker Loss - μ: {:>6.2} IPC, σ: {:>5.2} IPC",

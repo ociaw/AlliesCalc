@@ -2,12 +2,14 @@ use core::convert::TryFrom;
 use core::fmt::Display;
 use core::iter::{Iterator, Sum};
 use core::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use fixed::prelude::*;
+use fixed::types::U1F63;
 
 /// The probability of an event occurring. Guarnteed to lie within [0, 1].
 #[cfg_attr(feature = "serde1", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub struct Probability {
-    value: f64,
+    value: U1F63,
 }
 
 /// The tolerance for floating point errors when adding or subtracting.
@@ -29,6 +31,8 @@ impl Probability {
     ///
     /// Panics if `numer` is greater than `denom` or if `denom` is equal to 0.
     pub fn from_ratio(numer: u32, denom: u32) -> Self {
+        use fixed::types::{U32F96};
+
         if numer > denom {
             panic!(
                 "Numerator must be less than or equal to denominator. {} / {}",
@@ -38,19 +42,23 @@ impl Probability {
         if denom == 0 {
             panic!("Denominator must be non-zero.");
         }
+
+        let numer = U32F96::from_num(numer);
+        let denom = U32F96::from_num(denom);
+        let quotient: U1F63 = U1F63::from_num(numer / denom);
         Self {
-            value: numer as f64 / denom as f64,
+            value: quotient,
         }
     }
 
     /// Returns a `Probability` with a value of `0`.
-    pub const fn zero() -> Self {
-        Self { value: 0.0 }
+    pub fn zero() -> Self {
+        Self { value: U1F63::from_num(0) }
     }
 
     /// Returns a `Probability` with a value of `1`.
-    pub const fn one() -> Self {
-        Self { value: 1.0 }
+    pub fn one() -> Self {
+        Self { value: U1F63::from_num(1) }
     }
 }
 
@@ -62,7 +70,7 @@ impl Sum for Probability {
 
 impl Default for Probability {
     fn default() -> Self {
-        Self { value: 0.0 }
+        Self::zero()
     }
 }
 
@@ -72,7 +80,7 @@ impl TryFrom<f64> for Probability {
         if value < 0.0 || value > 1.0 {
             Err("Probability value must be between 0 and 1.")
         } else {
-            Ok(Self { value })
+            Ok(Self { value: value.to_fixed() })
         }
     }
 }
@@ -89,14 +97,14 @@ impl Add<Probability> for Probability {
             );
         }
         Self {
-            value: if value > 1.0 { 1.0 } else { value },
+            value: if value > 1 { U1F63::from_num(1) } else { value },
         }
     }
 }
 
 impl AddAssign for Probability {
     fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs;
+        self.value += rhs.value;
     }
 }
 
@@ -104,15 +112,9 @@ impl Sub<Probability> for Probability {
     type Output = Self;
 
     fn sub(self, rhs: Probability) -> Self::Output {
-        let value = self.value - rhs.value;
-        if value < 0.0 - TOLERANCE {
-            panic!(
-                "Sub results in a probability less than 0: {} - {}",
-                self.value, rhs.value
-            );
-        }
+        let value = self.value.saturating_sub(rhs.value);
         Self {
-            value: if value < 0.0 { 0.0 } else { value },
+            value
         }
     }
 }
@@ -135,15 +137,16 @@ impl Mul<Probability> for Probability {
 impl Mul<f64> for Probability {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self::Output {
+        let fixed: U1F63 = rhs.to_fixed();
         Self {
-            value: self.value * rhs,
+            value: self.value * fixed,
         }
     }
 }
 
 impl MulAssign for Probability {
     fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs;
+        self.value *= rhs.value;
     }
 }
 
@@ -154,6 +157,12 @@ impl Display for Probability {
 }
 
 impl From<Probability> for f64 {
+    fn from(value: Probability) -> Self {
+        value.value.lossy_into()
+    }
+}
+
+impl From<Probability> for U1F63 {
     fn from(value: Probability) -> Self {
         value.value
     }
