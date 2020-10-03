@@ -1,12 +1,14 @@
 <fieldset>
     <legend>{{ title }}</legend>
     <form [formGroup]=setupForm>
+        <!-- We don't yet support loss order selection, so hide this for now.
         <section class="loss-order">
             <h4>Loss Order</h4>
             <input type=radio value=strength formControlName="lossOrderControl" [id]="id + 'strength'" /><label [for]="id + 'strength'">Strength</label>
             <input type=radio value=custom formControlName="lossOrderControl" [id]="id + 'custom'" /><label [for]="id + 'custom'">Custom</label>
             <input type=radio value=ipc formControlName="lossOrderControl" [id]="id + 'ipc'" /><label [for]="id + 'ipc'">IPC</label>
         </section>
+        -->
         <section class="force-editor">
             <h4>Units</h4>
             <div class="unit" formArrayName="unitControls" *ngFor="let unit of unitFormArray.controls; let i = index">

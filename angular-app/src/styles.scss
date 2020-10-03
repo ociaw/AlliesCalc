@@ -49,9 +49,8 @@ thead {
 }
 
 tr {
-
     &:nth-child(2n) {
-        background-color: #EEE;
+        background-color: rgba(127, 127, 127, .1);
     }
 }
 
@@ -63,6 +62,22 @@ td, th {
     &.numeric {
         text-align: right;
     }
+}
+
+col + col.attack {
+    border-left: 2px solid #4e8789;
+}
+
+col.attack {
+    background-color: #FDD;
+}
+
+col.defense {
+    background-color: #DEE;
+}
+
+col.draw {
+    background-color: #EED;
 }
 
 .cumulative-results {
