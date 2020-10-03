@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { RoundSummary } from 'allies-calc-rs';
 import {
   ApexAxisChartSeries,
@@ -15,53 +15,55 @@ import {
   selector: 'app-round-chart',
   templateUrl: './round-chart.component.html',
 })
-export class RoundChartComponent implements OnInit {
+export class RoundChartComponent {
   private _summaries: RoundSummary[] = [];
   chart: ApexChart = { type: "bar", height: 350, animations: { enabled: false } };
-  title: ApexTitleSubtitle = { text: "IPC Chart" };
+  title: ApexTitleSubtitle = { text: "Stats by round" };
   plotOptions: ApexPlotOptions = { bar: { horizontal: false } };
   dataLabels: ApexDataLabels = { enabled: false };
-  tooltip: ApexTooltip = { y: { formatter: val => val.toFixed(2) + " IPC" } };
-  yaxis: ApexYAxis = { title: { text: "IPC" }, decimalsInFloat: 1 };
+  tooltip: ApexTooltip = { y: { formatter: val => val.toFixed(2) } };
+  yaxis: ApexYAxis = { decimalsInFloat: 1 };
   xaxis: ApexXAxis = { categories: [],  };
-  series: ApexAxisChartSeries;
+  series: ApexAxisChartSeries = []
 
   @ViewChild("chart", { static: false }) chartComponent!: ChartComponent;
-
-  constructor() {
-    this.series = [
-      {
-        name: "Attacker IPC",
-        data: []
-      },
-      {
-        name: "Defender IPC",
-        data: []
-      },
-    ];
-  }
-
-  ngOnInit(): void {
-  }
-
 
   @Input() set summaries(value: RoundSummary[]) {
     this._summaries = value;
     let categories = value.map(summary => summary.index == 0 ? "Pre-battle" : "Round " + summary.index);
-    let attackerIpcSeries = value.map(summary => summary.attacker.ipc.mean);
-    let defenderIpcSeries = value.map(summary => summary.defender.ipc.mean);
 
     this.xaxis = { categories: categories };
     this.series = [
       {
         name: "Attacker IPC",
-        data: attackerIpcSeries,
-        color: "#F00"
+        data: value.map(summary => summary.attacker.ipc.mean),
+        color: "#F44"
       },
       {
         name: "Defender IPC",
-        data: defenderIpcSeries,
+        data: value.map(summary => summary.defender.ipc.mean),
+        color: "#0AA",
+      },
+      {
+        name: "Attacker Units",
+        data: value.map(summary => summary.attacker.unit_count.mean),
+        color: "#F00"
+      },
+      {
+        name: "Defender Units",
+        data: value.map(summary => summary.defender.unit_count.mean),
         color: "#088",
+      },
+      {
+        name: "Attacker Strength",
+        data: value.map(summary => summary.attacker.strength.mean),
+        color: "#C00"
+      },
+      {
+        name: "Defender Strength",
+        data: value.map(summary => summary.defender.strength.mean),
+        color: "#066",
+
       }
     ];
   }
